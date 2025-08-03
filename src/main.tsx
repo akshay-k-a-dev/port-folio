@@ -11,6 +11,8 @@ import "./index.css";
 import Dashboard from "./pages/Dashboard.tsx";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Cli from "./pages/Cli.tsx";
+import Portfolio from "./pages/Portfolio.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -49,6 +51,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/cli" element={<Cli />} />
+            <Route path="/portfolio" element={<Portfolio />} />
           </Routes>
         </BrowserRouter>
         <Toaster />

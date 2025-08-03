@@ -33,11 +33,34 @@ const schema = defineSchema(
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
     // add other tables here
-
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    portfolio: defineTable({
+      about: v.string(),
+      projects: v.array(
+        v.object({
+          name: v.string(),
+          desc: v.string(),
+          url: v.string(),
+          tech: v.array(v.string()),
+          image: v.optional(v.string()),
+        }),
+      ),
+      contact: v.object({
+        email: v.string(),
+        github: v.string(),
+        linkedin: v.string(),
+      }),
+      name: v.string(),
+      tagline: v.string(),
+      skills: v.array(v.string()),
+      experience: v.array(
+        v.object({
+          year: v.string(),
+          title: v.string(),
+          company: v.string(),
+          desc: v.string(),
+        }),
+      ),
+    }),
   },
   {
     schemaValidation: false,
