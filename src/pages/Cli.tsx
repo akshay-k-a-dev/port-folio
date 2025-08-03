@@ -524,10 +524,10 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
         </Link>
       </div>
 
-      {/* Terminal Content - Scrollable */}
+      {/* Terminal Content - Full scrollable area */}
       <div
         ref={terminalRef}
-        className="flex-1 overflow-y-auto p-4 pb-20 z-10 relative"
+        className="flex-1 overflow-y-auto p-4 z-10 relative"
       >
         {history.map((item, index) => (
           <div key={index} className="mb-1">
@@ -552,11 +552,9 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
             )}
           </div>
         ))}
-      </div>
-
-      {/* Fixed Input at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-600 p-4 z-20">
-        <form onSubmit={handleSubmit} className="flex items-center">
+        
+        {/* Current input line - inline with content */}
+        <form onSubmit={handleSubmit} className="flex items-center mt-2">
           <span className="text-white font-bold mr-2 flex-shrink-0">
             {currentDir.split('/').pop()}@portfolio:{currentDir}$
           </span>
