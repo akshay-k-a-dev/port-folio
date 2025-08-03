@@ -23,15 +23,60 @@ const HELP_MESSAGE = `Available commands:
   grep      - Search text patterns
   man       - Show manual for commands
   matrix    - Toggle matrix rain effect
-  sl        - Choo choo!
+  sl        - Choo choo! (animated train)
+  cowsay    - Make a cow say something
+  fortune   - Get a random fortune
+  whoami    - Who are you?
+  uptime    - System uptime
+  ps        - Show running processes
   date      - Show current date and time
   exit      - Return to the main selection screen`;
 
-const TRAIN_ASCII = `
-   ____
-  |[]|_n__n_I_c
-  |____|-'____'-|
-  (o) (o) (o) (o)
+const ANIMATED_TRAIN = [
+  `                                 (  ) (@@) ( )  (@)  ()    @@    O     @     O     @      O
+                            (@@@)
+                        (    )
+                      (@@@@)
+                   (   )
+
+                ====        ________                ___________
+            _D _|  |_______/        \\__I_I_____===__|_________|
+             |(_)---  |   H\\________/ |   |        =|___ ___|      _________________
+             /     |  |   H  |  |     |   |         ||_| |_||     _|                \\_____A
+            |      |  |   H  |__--------------------| [___] |   =|                        |
+            | ________|___H__/__|_____/[][]~\\_______|       |   -|                        |
+            |/ |   |-----------I_____I [][] []  D   |=======|____|________________________|_
+          __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__|__________________________|_
+           |/-=|___|=    ||    ||    ||    |_____/~\\___/          |_D__D__D_|  |_D__D__D_|
+            \\_/      \\O=====O=====O=====O_/      \\_/               \\_/   \\_/    \\_/   \\_/`,
+  
+  `                                                      (@@) (  ) (@)  ( )  @@    O     @     O     @      O
+                                                 (@@@@)
+                                             (    )
+                                           (@@@@)
+                                        (   )
+
+                                     ====        ________                ___________
+                                 _D _|  |_______/        \\__I_I_____===__|_________|
+                                  |(_)---  |   H\\________/ |   |        =|___ ___|      _________________
+                                  /     |  |   H  |  |     |   |         ||_| |_||     _|                \\_____A
+                                 |      |  |   H  |__--------------------| [___] |   =|                        |
+                                 | ________|___H__/__|_____/[][]~\\_______|       |   -|                        |
+                                 |/ |   |-----------I_____I [][] []  D   |=======|____|________________________|_
+                               __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__|__________________________|_
+                                |/-=|___|=    ||    ||    ||    |_____/~\\___/          |_D__D__D_|  |_D__D__D_|
+                                 \\_/      \\O=====O=====O=====O_/      \\_/               \\_/   \\_/    \\_/   \\_/`,
+];
+
+const COW_ASCII = `
+ _____________________
+< Moo! Welcome to CLI >
+ ---------------------
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||
 `;
 
 const FAKE_FILES = [
@@ -42,16 +87,40 @@ const FAKE_FILES = [
   "README.md",
   "portfolio.js",
   ".hidden_secrets",
+  ".bashrc",
+  ".vimrc",
+];
+
+const FORTUNES = [
+  "The best way to predict the future is to invent it. - Alan Kay",
+  "Code is like humor. When you have to explain it, it's bad. - Cory House",
+  "First, solve the problem. Then, write the code. - John Johnson",
+  "Experience is the name everyone gives to their mistakes. - Oscar Wilde",
+  "In order to be irreplaceable, one must always be different. - Coco Chanel",
+  "Java is to JavaScript what car is to Carpet. - Chris Heilmann",
+  "Knowledge is power. - Francis Bacon",
+  "Sometimes it pays to stay in bed on Monday, rather than spending the rest of the week debugging Monday's code. - Dan Salomon",
+];
+
+const FAKE_PROCESSES = [
+  "  PID TTY          TIME CMD",
+  " 1337 pts/0    00:00:01 portfolio",
+  " 1338 pts/0    00:00:00 node",
+  " 1339 pts/0    00:00:02 react-dev",
+  " 1340 pts/0    00:00:00 convex",
+  " 1341 pts/0    00:00:01 typescript",
+  " 1342 pts/0    00:00:00 bash",
 ];
 
 export default function Cli() {
   const portfolioData = useQuery(api.portfolio.get);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<
-    { type: "command" | "output"; text: string; raw?: boolean }[]
+    { type: "command" | "output" | "error" | "success"; text: string; raw?: boolean; animated?: boolean }[]
   >([]);
   const [isMatrixActive, setIsMatrixActive] = useState(false);
   const [currentDir, setCurrentDir] = useState("/home/akshay");
+  const [isTrainAnimating, setIsTrainAnimating] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -65,198 +134,360 @@ export default function Cli() {
     if (!portfolioData) return;
     setHistory([
       {
-        type: "output",
-        text: `Welcome to Akshay's CLI Portfolio!\nType 'help' for a list of commands.`,
+        type: "success",
+        text: `🚀 Welcome to Akshay's Interactive Terminal! 🚀
+System initialized successfully...
+Type 'help' for available commands or 'fortune' for wisdom!`,
       },
     ]);
   }, [portfolioData]);
 
-  const handleCommand = (commandStr: string) => {
+  const animateTrain = async () => {
+    setIsTrainAnimating(true);
+    
+    for (let i = 0; i < ANIMATED_TRAIN.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setHistory(prev => [
+        ...prev.slice(0, -1),
+        { type: "output", text: ANIMATED_TRAIN[i], raw: true }
+      ]);
+    }
+    
+    setTimeout(() => {
+      setHistory(prev => [
+        ...prev,
+        { type: "success", text: "🚂 CHOO CHOO! The train has departed! 🚂" }
+      ]);
+      setIsTrainAnimating(false);
+    }, 1000);
+  };
+
+  const handleCommand = async (commandStr: string) => {
     const [command, ...args] = commandStr.toLowerCase().trim().split(" ");
     let output = "";
+    let type: "output" | "error" | "success" = "output";
     let raw = false;
+    let animated = false;
 
     const newHistory = [
       ...history,
-      { type: "command" as const, text: `> ${commandStr}` },
+      { type: "command" as const, text: `${currentDir.split('/').pop()}@portfolio:${currentDir}$ ${commandStr}` },
     ];
 
     switch (command) {
       case "help":
         output = HELP_MESSAGE;
+        type = "success";
         break;
       case "about":
-        output = portfolioData?.about ?? "About section not found.";
+        output = `📋 ABOUT AKSHAY 📋\n\n${portfolioData?.about ?? "About section not found."}`;
+        type = "success";
         break;
       case "projects":
-        output =
-          portfolioData?.projects
+        output = `🚀 MY AWESOME PROJECTS 🚀\n\n` +
+          (portfolioData?.projects
             .map(
-              (p) =>
-                `\nProject: ${p.name}\nDescription: ${p.desc}\nURL: ${p.url}\nTech: ${p.tech.join(", ")}\n`,
+              (p, i) =>
+                `[${i + 1}] ${p.name}\n    📝 ${p.desc}\n    🔗 ${p.url}\n    🛠️  Tech: ${p.tech.join(", ")}\n`,
             )
-            .join("") ?? "No projects found.";
+            .join("\n") ?? "No projects found.");
+        type = "success";
         break;
       case "contact":
-        output = `Email: ${portfolioData?.contact.email}\nGithub: ${portfolioData?.contact.github}\nLinkedIn: ${portfolioData?.contact.linkedin}`;
+        output = `📞 GET IN TOUCH 📞\n\n📧 Email: ${portfolioData?.contact.email}\n🐙 Github: ${portfolioData?.contact.github}\n💼 LinkedIn: ${portfolioData?.contact.linkedin}`;
+        type = "success";
         break;
       case "clear":
         setHistory([]);
         return;
       case "ls":
         if (args.includes("-l")) {
-          output = `total 7
--rw-r--r-- 1 akshay akshay 2048 Dec 15 10:30 resume.pdf
-drwxr-xr-x 2 akshay akshay 4096 Dec 15 09:15 projects/
--rw-r--r-- 1 akshay akshay  512 Dec 15 11:45 skills.txt
--rw-r--r-- 1 akshay akshay  256 Dec 15 08:20 contact.json
--rw-r--r-- 1 akshay akshay 1024 Dec 15 12:00 README.md
--rw-r--r-- 1 akshay akshay 3072 Dec 15 14:30 portfolio.js
--rw------- 1 akshay akshay   42 Dec 15 00:00 .hidden_secrets`;
+          output = `total 42
+drwxr-xr-x 2 akshay akshay 4096 Dec 15 10:30 📁 projects/
+-rw-r--r-- 1 akshay akshay 2048 Dec 15 10:30 📄 resume.pdf
+-rw-r--r-- 1 akshay akshay  512 Dec 15 11:45 📝 skills.txt
+-rw-r--r-- 1 akshay akshay  256 Dec 15 08:20 📋 contact.json
+-rw-r--r-- 1 akshay akshay 1024 Dec 15 12:00 📖 README.md
+-rw-r--r-- 1 akshay akshay 3072 Dec 15 14:30 ⚡ portfolio.js
+-rw------- 1 akshay akshay   42 Dec 15 00:00 🔒 .hidden_secrets
+-rw-r--r-- 1 akshay akshay  128 Dec 15 09:00 ⚙️  .bashrc
+-rw-r--r-- 1 akshay akshay   64 Dec 15 09:00 📝 .vimrc`;
           raw = true;
+          type = "success";
         } else {
-          output = FAKE_FILES.join("  ");
+          output = `📁 projects/     📄 resume.pdf      📝 skills.txt
+📋 contact.json  📖 README.md       ⚡ portfolio.js
+🔒 .hidden_secrets  ⚙️ .bashrc     📝 .vimrc`;
+          type = "success";
         }
         break;
       case "cd":
         const targetDir = args[0] || "~";
         if (targetDir === "~" || targetDir === "/home/akshay") {
           setCurrentDir("/home/akshay");
-          output = "";
+          output = "🏠 Welcome home!";
+          type = "success";
         } else if (targetDir === "projects" || targetDir === "projects/") {
           setCurrentDir("/home/akshay/projects");
-          output = "";
+          output = "📁 Entered projects directory";
+          type = "success";
         } else if (targetDir === ".." && currentDir !== "/home/akshay") {
           setCurrentDir("/home/akshay");
-          output = "";
+          output = "⬆️ Moved up one directory";
+          type = "success";
         } else {
-          output = `cd: ${targetDir}: No such file or directory`;
+          output = `❌ cd: ${targetDir}: No such file or directory`;
+          type = "error";
         }
         break;
       case "pwd":
-        output = currentDir;
+        output = `📍 Current location: ${currentDir}`;
+        type = "success";
         break;
       case "mkdir":
         const dirName = args[0];
         if (!dirName) {
-          output = "mkdir: missing operand";
+          output = "❌ mkdir: missing operand";
+          type = "error";
         } else {
-          output = `mkdir: created directory '${dirName}'`;
+          output = `✅ mkdir: created directory '${dirName}' 📁`;
+          type = "success";
         }
         break;
       case "rm":
         if (args.includes("-rf") || args.includes("-r")) {
-          output = `🚨 WHOA THERE! 🚨
-rm -rf is DISABLED for your safety!
-This isn't your server to destroy! 😅
-Try 'help' for safer commands.`;
+          output = `🚨🚨🚨 DANGER WILL ROBINSON! 🚨🚨🚨
+💥 rm -rf DETECTED! SHIELDS UP! 💥
+🛡️ This command has been BLOCKED! 🛡️
+🤖 I'm not letting you nuke my portfolio! 
+😅 Nice try though, you sneaky hacker!
+🔒 Security level: MAXIMUM PARANOIA`;
+          type = "error";
         } else {
-          output = `rm: operation not permitted
-(This is a demo portfolio, not a real filesystem!)`;
+          output = `🚫 rm: operation not permitted
+🎭 This is a demo portfolio, not a real filesystem!
+💡 Try 'help' for commands that actually work!`;
+          type = "error";
         }
         break;
       case "sudo":
-        output = `🔐 Nice try, hacker! 🔐
-sudo is disabled in this demo environment.
-You're not getting root access that easily! 😎
-This portfolio has trust issues.`;
+        output = `🔐🔐🔐 SUDO DETECTED! 🔐🔐🔐
+👑 Trying to become root, eh?
+🚫 ACCESS DENIED! 🚫
+🤡 You think I'd give you admin rights?
+😂 This portfolio has trust issues!
+🎪 Welcome to the circus of broken dreams!
+💀 sudo: akshay is not in the sudoers file. This incident will be reported.`;
+        type = "error";
         break;
       case "cp":
         const [source, dest] = args;
         if (!source || !dest) {
-          output = "cp: missing file operand";
+          output = "❌ cp: missing file operand";
+          type = "error";
         } else {
-          output = `cp: copied '${source}' to '${dest}'`;
+          output = `✅ cp: copied '${source}' to '${dest}' 📋`;
+          type = "success";
         }
         break;
       case "mv":
         const [mvSource, mvDest] = args;
         if (!mvSource || !mvDest) {
-          output = "mv: missing file operand";
+          output = "❌ mv: missing file operand";
+          type = "error";
         } else {
-          output = `mv: moved '${mvSource}' to '${mvDest}'`;
+          output = `✅ mv: moved '${mvSource}' to '${mvDest}' 🚚`;
+          type = "success";
         }
         break;
       case "cat":
         const fileName = args[0];
         if (!fileName) {
-          output = "cat: missing file operand";
+          output = "❌ cat: missing file operand";
+          type = "error";
         } else if (fileName === "resume.pdf") {
-          output = "cat: resume.pdf: cannot display binary file";
+          output = "❌ cat: resume.pdf: cannot display binary file\n💡 Hint: This is a PDF! Try downloading it instead! 📄";
+          type = "error";
         } else if (fileName === "skills.txt") {
-          output = portfolioData?.skills.join("\n") ?? "Skills not found.";
+          output = `🛠️ MY TECHNICAL SKILLS 🛠️\n\n${portfolioData?.skills.join("\n• ") ?? "Skills not found."}`;
+          type = "success";
         } else if (fileName === "contact.json") {
-          output = JSON.stringify(portfolioData?.contact, null, 2) ?? "{}";
+          output = `📋 CONTACT INFORMATION 📋\n\n${JSON.stringify(portfolioData?.contact, null, 2) ?? "{}"}`;
+          type = "success";
         } else if (fileName === "README.md") {
-          output = `# Akshay's Portfolio
+          output = `📖 PORTFOLIO README 📖
 
-Welcome to my interactive portfolio!
+# 🚀 Akshay's Interactive Portfolio
 
-## Available Views:
-- CLI Terminal (you are here!)
-- Modern Portfolio
+Welcome to my multi-dimensional portfolio experience!
 
-Type 'help' for available commands.`;
+## 🎯 Available Views:
+- 🖥️ CLI Terminal (you are here!)
+- 💼 Modern Portfolio
+
+## 🎮 Pro Tips:
+- Type 'help' for all available commands
+- Try 'fortune' for random wisdom
+- Use 'sl' for a fun surprise!
+- 'matrix' toggles the Matrix effect
+
+## 🔥 Easter Eggs:
+Hidden throughout the terminal... can you find them all?
+
+---
+Built with ❤️ and lots of ☕`;
+          type = "success";
         } else if (fileName === ".hidden_secrets") {
-          output = `🤫 SECRET UNLOCKED! 🤫
-You found the hidden file!
-Here's a secret: I love building cool stuff! ✨`;
+          output = `🤫🤫🤫 SECRET UNLOCKED! 🤫🤫🤫
+🎉 CONGRATULATIONS! You found the hidden file! 🎉
+🏆 Achievement Unlocked: "Curious Explorer"
+✨ Here's your reward: I absolutely LOVE building cool, interactive stuff!
+🚀 Fun fact: This entire terminal is built in React!
+🎨 Another secret: The Matrix effect is pure Canvas magic!
+🤓 You're clearly a fellow developer with great taste!`;
+          type = "success";
+        } else if (fileName === ".bashrc") {
+          output = `# 🐚 Akshay's Bash Configuration
+export PS1="\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias grep='grep --color=auto'
+
+# 🎨 Make terminal colorful
+export CLICOLOR=1
+export LSCOLORS=GxFxCxDxBxegedabagaced
+
+echo "🚀 Welcome to Akshay's terminal!"`;
+          type = "success";
         } else {
-          output = `cat: ${fileName}: No such file or directory`;
+          output = `❌ cat: ${fileName}: No such file or directory`;
+          type = "error";
         }
         break;
       case "grep":
         const pattern = args[0];
         const grepFile = args[1];
         if (!pattern) {
-          output = "grep: missing pattern";
+          output = "❌ grep: missing pattern";
+          type = "error";
         } else if (!grepFile) {
-          output = "grep: missing file operand";
+          output = "❌ grep: missing file operand";
+          type = "error";
         } else {
-          output = `grep: searching for '${pattern}' in ${grepFile}...
-(This is a demo - no actual search performed)`;
+          output = `🔍 grep: searching for '${pattern}' in ${grepFile}...
+📝 Match found on line 42: "The answer to everything is ${pattern}"
+✅ Search completed successfully!`;
+          type = "success";
         }
         break;
       case "man":
         const manCommand = args[0];
         if (!manCommand) {
-          output = "man: missing command";
+          output = "❌ man: missing command";
+          type = "error";
         } else {
-          output = `Manual page for ${manCommand}:
+          output = `📚 MANUAL PAGE FOR ${manCommand.toUpperCase()} 📚
 
 NAME
-    ${manCommand} - command line utility
+    ${manCommand} - interactive portfolio command
 
 DESCRIPTION
-    This is a demo portfolio terminal.
-    For real documentation, try the actual command!
+    This is Akshay's demo portfolio terminal.
+    Commands are simulated for demonstration purposes.
     
-    Type 'help' to see available portfolio commands.`;
+EXAMPLES
+    Try different commands and explore!
+    
+SEE ALSO
+    help(1), about(1), projects(1)
+    
+AUTHOR
+    Built with ❤️ by Akshay
+    
+💡 Type 'help' to see all available portfolio commands.`;
+          type = "success";
         }
+        break;
+      case "cowsay":
+        const message = args.join(" ") || "Hello from the CLI!";
+        output = COW_ASCII.replace("Moo! Welcome to CLI", message);
+        raw = true;
+        type = "success";
+        break;
+      case "fortune":
+        output = `🔮 FORTUNE COOKIE 🔮\n\n"${FORTUNES[Math.floor(Math.random() * FORTUNES.length)]}"`;
+        type = "success";
+        break;
+      case "whoami":
+        output = `🤔 WHO AM I? 🤔
+👤 You are: A curious visitor
+🌟 Status: Exploring Akshay's portfolio
+🎯 Mission: Discover awesome projects
+🔥 Level: Hacker (for using the CLI!)`;
+        type = "success";
+        break;
+      case "uptime":
+        const uptime = Math.floor(Math.random() * 100) + 1;
+        output = `⏰ SYSTEM UPTIME ⏰
+🚀 Portfolio has been running for: ${uptime} minutes
+💪 Load average: 0.42, 0.69, 1.33
+🔋 Status: Running smoothly!`;
+        type = "success";
+        break;
+      case "ps":
+        output = FAKE_PROCESSES.join("\n");
+        raw = true;
+        type = "success";
         break;
       case "matrix":
         setIsMatrixActive(!isMatrixActive);
-        output = `Matrix effect ${!isMatrixActive ? "activated" : "deactivated"}.`;
+        output = `🔴💊 ${!isMatrixActive ? "ENTERING" : "EXITING"} THE MATRIX 💊🔴
+${!isMatrixActive ? "🌊 Reality is dissolving..." : "👁️ Welcome back to reality"}
+Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
+        type = "success";
         break;
       case "sl":
-        output = TRAIN_ASCII;
-        raw = true;
+        if (isTrainAnimating) {
+          output = "🚂 Train is already running! Please wait...";
+          type = "error";
+        } else {
+          setHistory([...newHistory, { type: "output", text: ANIMATED_TRAIN[0], raw: true }]);
+          animateTrain();
+          return;
+        }
         break;
       case "date":
-        output = new Date().toString();
+        const now = new Date();
+        output = `📅 ${now.toDateString()} ⏰ ${now.toLocaleTimeString()}
+🌍 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+📊 Unix timestamp: ${Math.floor(now.getTime() / 1000)}`;
+        type = "success";
         break;
       case "exit":
-        output = "Redirecting...";
-        window.location.href = "/";
+        output = "👋 Goodbye! Redirecting to main menu...";
+        type = "success";
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
         break;
       case "":
         setHistory(newHistory);
         return;
       default:
-        output = `Command not found: ${command}. Type 'help' for a list of commands.`;
+        output = `❌ Command not found: ${command}
+💡 Did you mean one of these?
+   • help (show all commands)
+   • about (learn about me)
+   • projects (see my work)
+   
+🎯 Type 'help' for the full command list!`;
+        type = "error";
     }
 
-    setHistory([...newHistory, { type: "output", text: output, raw }]);
+    setHistory([...newHistory, { type, text: output, raw, animated }]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -275,7 +506,7 @@ DESCRIPTION
 
   return (
     <div
-      className="bg-black text-green-400 min-h-screen font-mono p-4 relative"
+      className="bg-black text-green-400 min-h-screen font-mono p-4 relative overflow-hidden"
       onClick={() => inputRef.current?.focus()}
     >
       {isMatrixActive && <MatrixRain />}
@@ -283,39 +514,62 @@ DESCRIPTION
         ref={terminalRef}
         className="w-full h-full overflow-y-auto z-10 relative"
       >
-        <div className="mb-4">
-          <Link to="/" className="text-blue-400 hover:underline">
+        {/* Terminal Header - Gnome style */}
+        <div className="flex items-center justify-between mb-4 p-2 bg-gray-800 rounded-t-lg border-b border-gray-600">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          </div>
+          <div className="text-gray-300 text-sm">akshay@portfolio: ~</div>
+          <Link to="/" className="text-blue-400 hover:underline text-sm">
             [Switch View]
           </Link>
         </div>
-        {history.map((item, index) => (
-          <div key={index}>
-            {item.type === "command" ? (
-              <p>{item.text}</p>
-            ) : item.raw ? (
-              <pre className="whitespace-pre-wrap">{item.text}</pre>
-            ) : (
-              <TypeAnimation
-                sequence={[item.text]}
-                wrapper="div"
-                speed={80}
-                cursor={false}
-                className="whitespace-pre-wrap"
-              />
+
+        {/* Terminal Content */}
+        <div className="bg-black p-4 rounded-b-lg min-h-[calc(100vh-120px)]">
+          {history.map((item, index) => (
+            <div key={index} className="mb-1">
+              {item.type === "command" ? (
+                <p className="text-white font-bold">{item.text}</p>
+              ) : item.raw ? (
+                <pre className={`whitespace-pre-wrap ${
+                  item.type === "error" ? "text-red-400" : 
+                  item.type === "success" ? "text-green-400" : "text-green-300"
+                }`}>{item.text}</pre>
+              ) : (
+                <TypeAnimation
+                  sequence={[item.text]}
+                  wrapper="div"
+                  speed={90}
+                  cursor={false}
+                  className={`whitespace-pre-wrap ${
+                    item.type === "error" ? "text-red-400" : 
+                    item.type === "success" ? "text-green-400" : "text-green-300"
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+          <form onSubmit={handleSubmit} className="flex items-center mt-2">
+            <span className="text-white font-bold mr-2">
+              {currentDir.split('/').pop()}@portfolio:{currentDir}$
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="bg-transparent border-none text-green-400 focus:outline-none flex-1"
+              autoFocus
+              disabled={isTrainAnimating}
+            />
+            {isTrainAnimating && (
+              <span className="text-yellow-400 ml-2 animate-pulse">🚂</span>
             )}
-          </div>
-        ))}
-        <form onSubmit={handleSubmit} className="flex items-center">
-          <span className="mr-2">{currentDir} &gt;</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="bg-transparent border-none text-green-400 focus:outline-none w-full"
-            autoFocus
-          />
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
