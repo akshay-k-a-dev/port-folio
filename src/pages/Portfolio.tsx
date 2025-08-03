@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import portfolioData from "@/data/portfolio.json";
 import { Link } from "react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { 
@@ -26,7 +25,6 @@ import {
 } from "lucide-react";
 
 export default function Portfolio() {
-  const portfolioData = useQuery(api.portfolio.get);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cursorVariant, setCursorVariant] = useState("default");
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -66,21 +64,6 @@ export default function Portfolio() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
-
-  if (!portfolioData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="flex items-center gap-4 text-white"
-        >
-          <Loader2 className="h-12 w-12 animate-spin" />
-          <span className="text-2xl font-bold">Loading Portfolio...</span>
-        </motion.div>
-      </div>
-    );
-  }
 
   // Custom cursor variants
   const cursorVariants = {
@@ -211,7 +194,7 @@ export default function Portfolio() {
               whileHover={{ scale: 1.05 }}
               className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
             >
-              {portfolioData?.name}
+              {portfolioData.name}
             </motion.div>
 
             {/* Desktop Navigation */}
@@ -339,7 +322,7 @@ export default function Portfolio() {
                   backgroundSize: "200% 200%",
                 }}
               >
-                {portfolioData?.name}
+                {portfolioData.name}
               </motion.span>
             </motion.h1>
             
@@ -353,7 +336,7 @@ export default function Portfolio() {
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                {portfolioData?.tagline}
+                {portfolioData.tagline}
               </motion.span>
             </motion.p>
 
@@ -412,9 +395,9 @@ export default function Portfolio() {
               className="flex justify-center gap-6"
             >
               {[
-                { icon: Github, href: portfolioData?.contact.github, label: "GitHub", color: "from-gray-500 to-gray-700" },
-                { icon: Linkedin, href: portfolioData?.contact.linkedin, label: "LinkedIn", color: "from-blue-500 to-blue-700" },
-                { icon: Mail, href: `mailto:${portfolioData?.contact.email}`, label: "Email", color: "from-red-500 to-red-700" },
+                { icon: Github, href: portfolioData.contact.github, label: "GitHub", color: "from-gray-500 to-gray-700" },
+                { icon: Linkedin, href: portfolioData.contact.linkedin, label: "LinkedIn", color: "from-blue-500 to-blue-700" },
+                { icon: Mail, href: `mailto:${portfolioData.contact.email}`, label: "Email", color: "from-red-500 to-red-700" },
               ].map(({ icon: Icon, href, label, color }) => (
                 <motion.a
                   onMouseEnter={linkEnter} onMouseLeave={linkLeave}
@@ -481,7 +464,7 @@ export default function Portfolio() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {portfolioData?.projects.map((project, index) => (
+            {portfolioData.projects.map((project, index) => (
               <motion.div
                 onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                 key={project.name}
@@ -795,7 +778,7 @@ export default function Portfolio() {
             viewport={{ once: true }}
             className="text-white/60"
           >
-            © 2024 {portfolioData?.name}. 
+            © 2024 {portfolioData.name}. 
             <motion.span
               whileHover={{ color: "#3b82f6" }}
               className="cursor-pointer transition-colors"

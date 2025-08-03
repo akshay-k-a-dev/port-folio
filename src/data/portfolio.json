@@ -1,0 +1,78 @@
+{
+  "name": "Akshay",
+  "tagline": "Full-stack developer passionate about open-source and creative projects.",
+  "about": "I'm a passionate full-stack developer with expertise in modern web technologies. I love building innovative solutions and contributing to open-source projects. My journey in software development has been driven by curiosity and a desire to create meaningful digital experiences.",
+  "skills": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "Python",
+    "Next.js",
+    "Tailwind CSS",
+    "MongoDB",
+    "PostgreSQL",
+    "Docker",
+    "AWS",
+    "Git",
+    "GraphQL",
+    "REST APIs",
+    "Express.js",
+    "Vue.js"
+  ],
+  "projects": [
+    {
+      "name": "Multi-View Portfolio",
+      "desc": "An interactive portfolio with CLI terminal and modern design views, built with React and TypeScript.",
+      "url": "https://github.com/akshay-k-a-dev/port-folio",
+      "tech": ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
+      "image": ""
+    },
+    {
+      "name": "Task Management App",
+      "desc": "A full-stack task management application with real-time updates and collaborative features.",
+      "url": "https://github.com/akshay-k-a-dev/task-manager",
+      "tech": ["React", "Node.js", "MongoDB", "Socket.io"],
+      "image": ""
+    },
+    {
+      "name": "E-commerce Platform",
+      "desc": "A modern e-commerce platform with payment integration and admin dashboard.",
+      "url": "https://github.com/akshay-k-a-dev/ecommerce",
+      "tech": ["Next.js", "Stripe", "PostgreSQL", "Prisma"],
+      "image": ""
+    },
+    {
+      "name": "Weather Dashboard",
+      "desc": "A responsive weather dashboard with location-based forecasts and interactive maps.",
+      "url": "https://github.com/akshay-k-a-dev/weather-app",
+      "tech": ["Vue.js", "OpenWeather API", "Chart.js", "Leaflet"],
+      "image": ""
+    }
+  ],
+  "experience": [
+    {
+      "year": "2023 - Present",
+      "title": "Full Stack Developer",
+      "company": "Tech Innovations Inc.",
+      "desc": "Leading development of scalable web applications using modern JavaScript frameworks. Collaborated with cross-functional teams to deliver high-quality software solutions."
+    },
+    {
+      "year": "2022 - 2023",
+      "title": "Frontend Developer",
+      "company": "Digital Solutions Ltd.",
+      "desc": "Developed responsive user interfaces and improved application performance. Worked closely with designers to implement pixel-perfect designs."
+    },
+    {
+      "year": "2021 - 2022",
+      "title": "Junior Developer",
+      "company": "StartUp Hub",
+      "desc": "Built and maintained web applications using React and Node.js. Gained experience in agile development methodologies and version control."
+    }
+  ],
+  "contact": {
+    "email": "akshayka@mamocollege.org",
+    "github": "https://github.com/akshay-k-a-dev",
+    "linkedin": "https://linkedin.com/in/akshay-k-a-dev"
+  }
+}

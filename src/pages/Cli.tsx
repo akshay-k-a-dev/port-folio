@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import portfolioData from "@/data/portfolio.json";
 import { Link } from "react-router";
 import { TypeAnimation } from "react-type-animation";
 import MatrixRain from "@/components/MatrixRain";
@@ -113,7 +112,6 @@ const FAKE_PROCESSES = [
 ];
 
 export default function Cli() {
-  const portfolioData = useQuery(api.portfolio.get);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<
     { type: "command" | "output" | "error" | "success"; text: string; raw?: boolean; animated?: boolean }[]
@@ -158,7 +156,6 @@ export default function Cli() {
   }, [history]);
 
   useEffect(() => {
-    if (!portfolioData) return;
     setHistory([
       {
         type: "success",
@@ -167,7 +164,7 @@ System initialized successfully...
 Type 'help' for available commands or 'fortune' for wisdom!`,
       },
     ]);
-  }, [portfolioData]);
+  }, []);
 
   const animateTrain = async () => {
     setIsTrainAnimating(true);
@@ -200,62 +197,35 @@ Type 'help' for available commands or 'fortune' for wisdom!`,
       { type: "command" as const, text: `${currentDir.split('/').pop()}@portfolio:${currentDir}$ ${commandStr}` },
     ];
 
-    // Add mobile-specific commands
-    if (command === "mobile") {
-      output = `📱 MOBILE MODE DETECTED! 📱
-🎮 Touch-friendly features enabled!
-📝 Use the virtual keyboard below
-💡 Tap suggestions to auto-complete
-🔄 Swipe gestures coming soon!
-✨ Optimized for ${window.innerWidth}x${window.innerHeight}`;
-      type = "success";
-    } else if (command === "touch") {
-      output = `👆 TOUCH INTERFACE ACTIVATED! 👆
-🎯 Tap anywhere to focus input
-📋 Command suggestions appear as you type
-⌨️ Virtual keyboard available
-🎨 Haptic feedback enabled (if supported)
-📱 Responsive design active!`;
-      type = "success";
-      // Add haptic feedback if available
-      if ('vibrate' in navigator) {
-        navigator.vibrate(100);
-      }
-    } else {
-      switch (command) {
-        case "help":
-          output = `${HELP_MESSAGE}
-          
-📱 MOBILE COMMANDS:
-  mobile    - Show mobile-specific info
-  touch     - Enable touch interface features
-  keyboard  - Toggle virtual keyboard`;
-          type = "success";
-          break;
-        case "about":
-          output = `📋 ABOUT AKSHAY 📋\n\n${portfolioData?.about ?? "About section not found."}`;
-          type = "success";
-          break;
-        case "projects":
-          output = `🚀 MY AWESOME PROJECTS 🚀\n\n` +
-            (portfolioData?.projects
-              .map(
-                (p, i) =>
-                  `[${i + 1}] ${p.name}\n    📝 ${p.desc}\n    🔗 ${p.url}\n    🛠️  Tech: ${p.tech.join(", ")}\n`,
-              )
-              .join("\n") ?? "No projects found.");
-          type = "success";
-          break;
-        case "contact":
-          output = `📞 GET IN TOUCH 📞\n\n📧 Email: ${portfolioData?.contact.email}\n🐙 Github: ${portfolioData?.contact.github}\n💼 LinkedIn: ${portfolioData?.contact.linkedin}`;
-          type = "success";
-          break;
-        case "clear":
-          setHistory([]);
-          return;
-        case "ls":
-          if (args.includes("-l")) {
-            output = `total 42
+    switch (command) {
+      case "about":
+        output = `📋 ABOUT AKSHAY 📋\n\n${portfolioData.about}`;
+        type = "success";
+        break;
+      case "projects":
+        output = `🚀 MY AWESOME PROJECTS 🚀\n\n` +
+          portfolioData.projects
+            .map(
+              (p, i) =>
+                `[${i + 1}] ${p.name}\n    📝 ${p.desc}\n    🔗 ${p.url}\n    🛠️  Tech: ${p.tech.join(", ")}\n`,
+            )
+            .join("\n");
+        type = "success";
+        break;
+      case "contact":
+        output = `📞 GET IN TOUCH 📞\n\n📧 Email: ${portfolioData.contact.email}\n🐙 Github: ${portfolioData.contact.github}\n💼 LinkedIn: ${portfolioData.contact.linkedin}`;
+        type = "success";
+        break;
+      case "skills":
+        output = `🛠️ MY TECHNICAL SKILLS 🛠️\n\n• ${portfolioData.skills.join("\n• ")}`;
+        type = "success";
+        break;
+      case "clear":
+        setHistory([]);
+        return;
+      case "ls":
+        if (args.includes("-l")) {
+          output = `total 42
 drwxr-xr-x 2 akshay akshay 4096 Dec 15 10:30 📁 projects/
 -rw-r--r-- 1 akshay akshay 2048 Dec 15 10:30 📄 resume.pdf
 -rw-r--r-- 1 akshay akshay  512 Dec 15 11:45 📝 skills.txt
@@ -265,110 +235,110 @@ drwxr-xr-x 2 akshay akshay 4096 Dec 15 10:30 📁 projects/
 -rw------- 1 akshay akshay   42 Dec 15 00:00 🔒 .hidden_secrets
 -rw-r--r-- 1 akshay akshay  128 Dec 15 09:00 ⚙️  .bashrc
 -rw-r--r-- 1 akshay akshay   64 Dec 15 09:00 📝 .vimrc`;
-            raw = true;
-            type = "success";
-          } else {
-            output = `📁 projects/     📄 resume.pdf      📝 skills.txt
+          raw = true;
+          type = "success";
+        } else {
+          output = `📁 projects/     📄 resume.pdf      📝 skills.txt
 📋 contact.json  📖 README.md       ⚡ portfolio.js
 🔒 .hidden_secrets  ⚙️ .bashrc     📝 .vimrc`;
-            type = "success";
-          }
-          break;
-        case "cd":
-          const targetDir = args[0] || "~";
-          if (targetDir === "~" || targetDir === "/home/akshay") {
-            setCurrentDir("/home/akshay");
-            output = "🏠 Welcome home!";
-            type = "success";
-          } else if (targetDir === "projects" || targetDir === "projects/") {
-            setCurrentDir("/home/akshay/projects");
-            output = "📁 Entered projects directory";
-            type = "success";
-          } else if (targetDir === ".." && currentDir !== "/home/akshay") {
-            setCurrentDir("/home/akshay");
-            output = "⬆️ Moved up one directory";
-            type = "success";
-          } else {
-            output = `❌ cd: ${targetDir}: No such file or directory`;
-            type = "error";
-          }
-          break;
-        case "pwd":
-          output = `📍 Current location: ${currentDir}`;
           type = "success";
-          break;
-        case "mkdir":
-          const dirName = args[0];
-          if (!dirName) {
-            output = "❌ mkdir: missing operand";
-            type = "error";
-          } else {
-            output = `✅ mkdir: created directory '${dirName}' 📁`;
-            type = "success";
-          }
-          break;
-        case "rm":
-          if (args.includes("-rf") || args.includes("-r")) {
-            output = `🚨🚨🚨 DANGER WILL ROBINSON! 🚨🚨🚨
+        }
+        break;
+      case "cd":
+        const targetDir = args[0] || "~";
+        if (targetDir === "~" || targetDir === "/home/akshay") {
+          setCurrentDir("/home/akshay");
+          output = "🏠 Welcome home!";
+          type = "success";
+        } else if (targetDir === "projects" || targetDir === "projects/") {
+          setCurrentDir("/home/akshay/projects");
+          output = "📁 Entered projects directory";
+          type = "success";
+        } else if (targetDir === ".." && currentDir !== "/home/akshay") {
+          setCurrentDir("/home/akshay");
+          output = "⬆️ Moved up one directory";
+          type = "success";
+        } else {
+          output = `❌ cd: ${targetDir}: No such file or directory`;
+          type = "error";
+        }
+        break;
+      case "pwd":
+        output = `📍 Current location: ${currentDir}`;
+        type = "success";
+        break;
+      case "mkdir":
+        const dirName = args[0];
+        if (!dirName) {
+          output = "❌ mkdir: missing operand";
+          type = "error";
+        } else {
+          output = `✅ mkdir: created directory '${dirName}' 📁`;
+          type = "success";
+        }
+        break;
+      case "rm":
+        if (args.includes("-rf") || args.includes("-r")) {
+          output = `🚨🚨🚨 DANGER WILL ROBINSON! 🚨🚨🚨
 💥 rm -rf DETECTED! SHIELDS UP! 💥
 🛡️ This command has been BLOCKED! 🛡️
 🤖 I'm not letting you nuke my portfolio! 
 😅 Nice try though, you sneaky hacker!
 🔒 Security level: MAXIMUM PARANOIA`;
-            type = "error";
-          } else {
-            output = `🚫 rm: operation not permitted
+          type = "error";
+        } else {
+          output = `🚫 rm: operation not permitted
 🎭 This is a demo portfolio, not a real filesystem!
 💡 Try 'help' for commands that actually work!`;
-            type = "error";
-          }
-          break;
-        case "sudo":
-          output = `🔐🔐🔐 SUDO DETECTED! 🔐🔐🔐
+          type = "error";
+        }
+        break;
+      case "sudo":
+        output = `🔐🔐🔐 SUDO DETECTED! 🔐🔐🔐
 👑 Trying to become root, eh?
 🚫 ACCESS DENIED! 🚫
 🤡 You think I'd give you admin rights?
 😂 This portfolio has trust issues!
 🎪 Welcome to the circus of broken dreams!
 💀 sudo: akshay is not in the sudoers file. This incident will be reported.`;
+        type = "error";
+        break;
+      case "cp":
+        const [source, dest] = args;
+        if (!source || !dest) {
+          output = "❌ cp: missing file operand";
           type = "error";
-          break;
-        case "cp":
-          const [source, dest] = args;
-          if (!source || !dest) {
-            output = "❌ cp: missing file operand";
-            type = "error";
-          } else {
-            output = `✅ cp: copied '${source}' to '${dest}' 📋`;
-            type = "success";
-          }
-          break;
-        case "mv":
-          const [mvSource, mvDest] = args;
-          if (!mvSource || !mvDest) {
-            output = "❌ mv: missing file operand";
-            type = "error";
-          } else {
-            output = `✅ mv: moved '${mvSource}' to '${mvDest}' 🚚`;
-            type = "success";
-          }
-          break;
-        case "cat":
-          const fileName = args[0];
-          if (!fileName) {
-            output = "❌ cat: missing file operand";
-            type = "error";
-          } else if (fileName === "resume.pdf") {
-            output = "❌ cat: resume.pdf: cannot display binary file\n💡 Hint: This is a PDF! Try downloading it instead! 📄";
-            type = "error";
-          } else if (fileName === "skills.txt") {
-            output = `🛠️ MY TECHNICAL SKILLS 🛠️\n\n${portfolioData?.skills.join("\n• ") ?? "Skills not found."}`;
-            type = "success";
-          } else if (fileName === "contact.json") {
-            output = `📋 CONTACT INFORMATION 📋\n\n${JSON.stringify(portfolioData?.contact, null, 2) ?? "{}"}`;
-            type = "success";
-          } else if (fileName === "README.md") {
-            output = `📖 PORTFOLIO README 📖
+        } else {
+          output = `✅ cp: copied '${source}' to '${dest}' 📋`;
+          type = "success";
+        }
+        break;
+      case "mv":
+        const [mvSource, mvDest] = args;
+        if (!mvSource || !mvDest) {
+          output = "❌ mv: missing file operand";
+          type = "error";
+        } else {
+          output = `✅ mv: moved '${mvSource}' to '${mvDest}' 🚚`;
+          type = "success";
+        }
+        break;
+      case "cat":
+        const fileName = args[0];
+        if (!fileName) {
+          output = "❌ cat: missing file operand";
+          type = "error";
+        } else if (fileName === "resume.pdf") {
+          output = "❌ cat: resume.pdf: cannot display binary file\n💡 Hint: This is a PDF! Try downloading it instead! 📄";
+          type = "error";
+        } else if (fileName === "skills.txt") {
+          output = `🛠️ MY TECHNICAL SKILLS 🛠️\n\n${portfolioData?.skills.join("\n• ") ?? "Skills not found."}`;
+          type = "success";
+        } else if (fileName === "contact.json") {
+          output = `📋 CONTACT INFORMATION 📋\n\n${JSON.stringify(portfolioData?.contact, null, 2) ?? "{}"}`;
+          type = "success";
+        } else if (fileName === "README.md") {
+          output = `📖 PORTFOLIO README 📖
 
 # 🚀 Akshay's Interactive Portfolio
 
@@ -389,18 +359,18 @@ Hidden throughout the terminal... can you find them all?
 
 ---
 Built with ❤️ and lots of ☕`;
-            type = "success";
-          } else if (fileName === ".hidden_secrets") {
-            output = `🤫🤫🤫 SECRET UNLOCKED! 🤫🤫🤫
+          type = "success";
+        } else if (fileName === ".hidden_secrets") {
+          output = `🤫🤫🤫 SECRET UNLOCKED! 🤫🤫🤫
 🎉 CONGRATULATIONS! You found the hidden file! 🎉
 🏆 Achievement Unlocked: "Curious Explorer"
 ✨ Here's your reward: I absolutely LOVE building cool, interactive stuff!
 🚀 Fun fact: This entire terminal is built in React!
 🎨 Another secret: The Matrix effect is pure Canvas magic!
 🤓 You're clearly a fellow developer with great taste!`;
-            type = "success";
-          } else if (fileName === ".bashrc") {
-            output = `# 🐚 Akshay's Bash Configuration
+          type = "success";
+        } else if (fileName === ".bashrc") {
+          output = `# 🐚 Akshay's Bash Configuration
 export PS1="\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
 alias ll='ls -alF'
 alias la='ls -A'
@@ -414,35 +384,35 @@ export CLICOLOR=1
 export LSCOLORS=GxFxCxDxBxegedabagaced
 
 echo "🚀 Welcome to Akshay's terminal!"`;
-            type = "success";
-          } else {
-            output = `❌ cat: ${fileName}: No such file or directory`;
-            type = "error";
-          }
-          break;
-        case "grep":
-          const pattern = args[0];
-          const grepFile = args[1];
-          if (!pattern) {
-            output = "❌ grep: missing pattern";
-            type = "error";
-          } else if (!grepFile) {
-            output = "❌ grep: missing file operand";
-            type = "error";
-          } else {
-            output = `🔍 grep: searching for '${pattern}' in ${grepFile}...
+          type = "success";
+        } else {
+          output = `❌ cat: ${fileName}: No such file or directory`;
+          type = "error";
+        }
+        break;
+      case "grep":
+        const pattern = args[0];
+        const grepFile = args[1];
+        if (!pattern) {
+          output = "❌ grep: missing pattern";
+          type = "error";
+        } else if (!grepFile) {
+          output = "❌ grep: missing file operand";
+          type = "error";
+        } else {
+          output = `🔍 grep: searching for '${pattern}' in ${grepFile}...
 📝 Match found on line 42: "The answer to everything is ${pattern}"
 ✅ Search completed successfully!`;
-            type = "success";
-          }
-          break;
-        case "man":
-          const manCommand = args[0];
-          if (!manCommand) {
-            output = "❌ man: missing command";
-            type = "error";
-          } else {
-            output = `📚 MANUAL PAGE FOR ${manCommand.toUpperCase()} 📚
+          type = "success";
+        }
+        break;
+      case "man":
+        const manCommand = args[0];
+        if (!manCommand) {
+          output = "❌ man: missing command";
+          type = "error";
+        } else {
+          output = `📚 MANUAL PAGE FOR ${manCommand.toUpperCase()} 📚
 
 NAME
     ${manCommand} - interactive portfolio command
@@ -461,84 +431,83 @@ AUTHOR
     Built with ❤️ by Akshay
     
 💡 Type 'help' to see all available portfolio commands.`;
-            type = "success";
-          }
-          break;
-        case "cowsay":
-          const message = args.join(" ") || "Hello from the CLI!";
-          output = COW_ASCII.replace("Moo! Welcome to CLI", message);
-          raw = true;
           type = "success";
-          break;
-        case "fortune":
-          output = `🔮 FORTUNE COOKIE 🔮\n\n"${FORTUNES[Math.floor(Math.random() * FORTUNES.length)]}"`;
-          type = "success";
-          break;
-        case "whoami":
-          output = `🤔 WHO AM I? 🤔
+        }
+        break;
+      case "cowsay":
+        const message = args.join(" ") || "Hello from the CLI!";
+        output = COW_ASCII.replace("Moo! Welcome to CLI", message);
+        raw = true;
+        type = "success";
+        break;
+      case "fortune":
+        output = `🔮 FORTUNE COOKIE 🔮\n\n"${FORTUNES[Math.floor(Math.random() * FORTUNES.length)]}"`;
+        type = "success";
+        break;
+      case "whoami":
+        output = `🤔 WHO AM I? 🤔
 👤 You are: A curious visitor
 🌟 Status: Exploring Akshay's portfolio
 🎯 Mission: Discover awesome projects
 🔥 Level: Hacker (for using the CLI!)`;
-          type = "success";
-          break;
-        case "uptime":
-          const uptime = Math.floor(Math.random() * 100) + 1;
-          output = `⏰ SYSTEM UPTIME ⏰
+        type = "success";
+        break;
+      case "uptime":
+        const uptime = Math.floor(Math.random() * 100) + 1;
+        output = `⏰ SYSTEM UPTIME ⏰
 🚀 Portfolio has been running for: ${uptime} minutes
 💪 Load average: 0.42, 0.69, 1.33
 🔋 Status: Running smoothly!`;
-          type = "success";
-          break;
-        case "ps":
-          output = FAKE_PROCESSES.join("\n");
-          raw = true;
-          type = "success";
-          break;
-        case "matrix":
-          setIsMatrixActive(!isMatrixActive);
-          output = `🔴💊 ${!isMatrixActive ? "ENTERING" : "EXITING"} THE MATRIX 💊🔴
+        type = "success";
+        break;
+      case "ps":
+        output = FAKE_PROCESSES.join("\n");
+        raw = true;
+        type = "success";
+        break;
+      case "matrix":
+        setIsMatrixActive(!isMatrixActive);
+        output = `🔴💊 ${!isMatrixActive ? "ENTERING" : "EXITING"} THE MATRIX 💊🔴
 ${!isMatrixActive ? "🌊 Reality is dissolving..." : "👁️ Welcome back to reality"}
 Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
-          type = "success";
-          break;
-        case "sl":
-          if (isTrainAnimating) {
-            output = "🚂 Train is already running! Please wait...";
-            type = "error";
-          } else {
-            setHistory([...newHistory, { type: "output", text: ANIMATED_TRAIN[0], raw: true }]);
-            animateTrain();
-            return;
-          }
-          break;
-        case "date":
-          const now = new Date();
-          output = `📅 ${now.toDateString()} ⏰ ${now.toLocaleTimeString()}
+        type = "success";
+        break;
+      case "sl":
+        if (isTrainAnimating) {
+          output = "🚂 Train is already running! Please wait...";
+          type = "error";
+        } else {
+          setHistory([...newHistory, { type: "output", text: ANIMATED_TRAIN[0], raw: true }]);
+          animateTrain();
+          return;
+        }
+        break;
+      case "date":
+        const now = new Date();
+        output = `📅 ${now.toDateString()} ⏰ ${now.toLocaleTimeString()}
 🌍 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
 📊 Unix timestamp: ${Math.floor(now.getTime() / 1000)}`;
-          type = "success";
-          break;
-        case "exit":
-          output = "👋 Goodbye! Redirecting to main menu...";
-          type = "success";
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 1000);
-          break;
-        case "":
-          setHistory(newHistory);
-          return;
-        default:
-          output = `❌ Command not found: ${command}
+        type = "success";
+        break;
+      case "exit":
+        output = "👋 Goodbye! Redirecting to main menu...";
+        type = "success";
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+        break;
+      case "":
+        setHistory(newHistory);
+        return;
+      default:
+        output = `❌ Command not found: ${command}
 💡 Did you mean one of these?
    • help (show all commands)
    • about (learn about me)
    • projects (see my work)
    
 🎯 Type 'help' for the full command list!`;
-          type = "error";
-      }
+        type = "error";
     }
 
     setHistory([...newHistory, { type, text: output, raw }]);
@@ -549,24 +518,6 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
     handleCommand(input);
     setInput("");
   };
-
-  if (!portfolioData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-green-400 mx-auto mb-4" />
-          <div className="text-green-400 font-mono">
-            <TypeAnimation
-              sequence={['Initializing terminal...', 1000, 'Loading portfolio data...', 1000, 'Establishing connection...', 500]}
-              wrapper="div"
-              speed={50}
-              repeat={Infinity}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
