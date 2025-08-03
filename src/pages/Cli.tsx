@@ -506,70 +506,73 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
 
   return (
     <div
-      className="bg-black text-green-400 min-h-screen font-mono p-4 relative overflow-hidden"
+      className="bg-black text-green-400 min-h-screen font-mono relative overflow-hidden flex flex-col"
       onClick={() => inputRef.current?.focus()}
     >
       {isMatrixActive && <MatrixRain />}
+      
+      {/* Terminal Header - Gnome style */}
+      <div className="flex items-center justify-between p-2 bg-gray-800 border-b border-gray-600 z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+        </div>
+        <div className="text-gray-300 text-sm">akshay@portfolio: ~</div>
+        <Link to="/" className="text-blue-400 hover:underline text-sm">
+          [Switch View]
+        </Link>
+      </div>
+
+      {/* Terminal Content - Scrollable */}
       <div
         ref={terminalRef}
-        className="w-full h-full overflow-y-auto z-10 relative"
+        className="flex-1 overflow-y-auto p-4 pb-20 z-10 relative"
       >
-        {/* Terminal Header - Gnome style */}
-        <div className="flex items-center justify-between mb-4 p-2 bg-gray-800 rounded-t-lg border-b border-gray-600">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          </div>
-          <div className="text-gray-300 text-sm">akshay@portfolio: ~</div>
-          <Link to="/" className="text-blue-400 hover:underline text-sm">
-            [Switch View]
-          </Link>
-        </div>
-
-        {/* Terminal Content */}
-        <div className="bg-black p-4 rounded-b-lg min-h-[calc(100vh-120px)]">
-          {history.map((item, index) => (
-            <div key={index} className="mb-1">
-              {item.type === "command" ? (
-                <p className="text-white font-bold">{item.text}</p>
-              ) : item.raw ? (
-                <pre className={`whitespace-pre-wrap ${
+        {history.map((item, index) => (
+          <div key={index} className="mb-1">
+            {item.type === "command" ? (
+              <p className="text-white font-bold">{item.text}</p>
+            ) : item.raw ? (
+              <pre className={`whitespace-pre-wrap ${
+                item.type === "error" ? "text-red-400" : 
+                item.type === "success" ? "text-green-400" : "text-green-300"
+              }`}>{item.text}</pre>
+            ) : (
+              <TypeAnimation
+                sequence={[item.text]}
+                wrapper="div"
+                speed={90}
+                cursor={false}
+                className={`whitespace-pre-wrap ${
                   item.type === "error" ? "text-red-400" : 
                   item.type === "success" ? "text-green-400" : "text-green-300"
-                }`}>{item.text}</pre>
-              ) : (
-                <TypeAnimation
-                  sequence={[item.text]}
-                  wrapper="div"
-                  speed={90}
-                  cursor={false}
-                  className={`whitespace-pre-wrap ${
-                    item.type === "error" ? "text-red-400" : 
-                    item.type === "success" ? "text-green-400" : "text-green-300"
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-          <form onSubmit={handleSubmit} className="flex items-center mt-2">
-            <span className="text-white font-bold mr-2">
-              {currentDir.split('/').pop()}@portfolio:{currentDir}$
-            </span>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="bg-transparent border-none text-green-400 focus:outline-none flex-1"
-              autoFocus
-              disabled={isTrainAnimating}
-            />
-            {isTrainAnimating && (
-              <span className="text-yellow-400 ml-2 animate-pulse">🚂</span>
+                }`}
+              />
             )}
-          </form>
-        </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Fixed Input at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-600 p-4 z-20">
+        <form onSubmit={handleSubmit} className="flex items-center">
+          <span className="text-white font-bold mr-2 flex-shrink-0">
+            {currentDir.split('/').pop()}@portfolio:{currentDir}$
+          </span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="bg-transparent border-none text-green-400 focus:outline-none flex-1"
+            autoFocus
+            disabled={isTrainAnimating}
+          />
+          {isTrainAnimating && (
+            <span className="text-yellow-400 ml-2 animate-pulse">🚂</span>
+          )}
+        </form>
       </div>
     </div>
   );
