@@ -62,7 +62,7 @@ export default function Portfolio() {
   }
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-x-hidden cursor-none">
+    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-x-hidden" style={{ cursor: "url('data:image/svg+xml;charset=utf8,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"%23ffffff\" stroke-width=\"2\"%3E%3Ccircle cx=\"12\" cy=\"12\" r=\"10\"/%3E%3Cpath d=\"m9 12 2 2 4-4\"/%3E%3C/svg%3E'), auto" }}>
       {/* Animated Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />

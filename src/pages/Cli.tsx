@@ -508,8 +508,7 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
     <div
       className="bg-black text-green-400 min-h-screen font-mono relative overflow-hidden flex flex-col"
       style={{
-        cursor:
-          "url('data:image/svg+xml;charset=utf8,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"%2300ff00\" stroke-width=\"1\"%3E%3Cpath d=\"M10 0v20M0 10h20\"/%3E%3C/svg%3E'), auto",
+        cursor: "url('data:image/svg+xml;charset=utf8,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"%2300ff00\" stroke-width=\"1\"%3E%3Cpath d=\"M10 0v20M0 10h20\"/%3E%3C/svg%3E'), auto"
       }}
       onClick={() => inputRef.current?.focus()}
     >
