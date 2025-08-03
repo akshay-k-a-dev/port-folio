@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Link } from "react-router";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { 
   Github, 
   Linkedin, 
@@ -10,33 +10,26 @@ import {
   ExternalLink, 
   Code, 
   Sparkles, 
-  Zap,
+  Briefcase,
   ArrowRight,
   Download,
-  MapPin,
-  Calendar,
-  Briefcase,
-  Star,
-  ChevronDown
+  ChevronDown,
+  Calendar
 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
 export default function Portfolio() {
   const portfolioData = useQuery(api.portfolio.get);
-  const [activeSection, setActiveSection] = useState("hero");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [cursorVariant, setCursorVariant] = useState("default");
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const { scrollYProgress } = useScroll();
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "200%"]);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
 
-  useEffect(() => {
-    if (portfolioData) {
-      setIsLoaded(true);
-    }
-  }, [portfolioData]);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -61,8 +54,37 @@ export default function Portfolio() {
     );
   }
 
+  const cursorVariants = {
+    default: {
+      x: mousePosition.x - 8,
+      y: mousePosition.y - 8,
+      height: 16,
+      width: 16,
+      backgroundColor: "rgba(168, 85, 247, 0.7)",
+      mixBlendMode: "screen" as const
+    },
+    link: {
+      x: mousePosition.x - 16,
+      y: mousePosition.y - 16,
+      height: 32,
+      width: 32,
+      backgroundColor: "rgba(255, 255, 255, 1)",
+      mixBlendMode: "difference" as const
+    },
+  };
+
+  const linkEnter = () => setCursorVariant("link");
+  const linkLeave = () => setCursorVariant("default");
+
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-x-hidden" style={{ cursor: "url('data:image/svg+xml;charset=utf8,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"%23ffffff\" stroke-width=\"2\"%3E%3Ccircle cx=\"12\" cy=\"12\" r=\"10\"/%3E%3Cpath d=\"m9 12 2 2 4-4\"/%3E%3C/svg%3E'), auto" }}>
+    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-x-hidden cursor-none">
+      <motion.div
+        className="fixed top-0 left-0 rounded-full z-[9999] pointer-events-none"
+        variants={cursorVariants}
+        animate={cursorVariant}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      />
+      
       {/* Animated Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
@@ -72,7 +94,6 @@ export default function Portfolio() {
             background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(29, 78, 216, 0.15), transparent 80%)`,
           }}
         />
-        {/* Floating particles */}
         {[...Array(50)].map((_, i) => (
           <motion.div
             key={i}
@@ -102,6 +123,7 @@ export default function Portfolio() {
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <motion.div
+            onMouseEnter={linkEnter} onMouseLeave={linkLeave}
             whileHover={{ scale: 1.05 }}
             className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
           >
@@ -110,6 +132,7 @@ export default function Portfolio() {
           <div className="flex items-center gap-6">
             {["About", "Skills", "Projects", "Experience", "Contact"].map((item) => (
               <motion.a
+                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                 key={item}
                 href={`#${item.toLowerCase()}`}
                 whileHover={{ scale: 1.1 }}
@@ -120,6 +143,7 @@ export default function Portfolio() {
             ))}
             <Link
               to="/"
+              onMouseEnter={linkEnter} onMouseLeave={linkLeave}
               className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all"
             >
               Switch View
@@ -161,6 +185,7 @@ export default function Portfolio() {
               className="flex flex-wrap justify-center gap-4 mb-12"
             >
               <motion.button
+                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(59, 130, 246, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-semibold flex items-center gap-2"
@@ -170,6 +195,7 @@ export default function Portfolio() {
               </motion.button>
               
               <motion.button
+                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-8 py-4 border border-white/30 rounded-full text-white font-semibold hover:bg-white/10 transition-colors flex items-center gap-2"
@@ -179,7 +205,6 @@ export default function Portfolio() {
               </motion.button>
             </motion.div>
 
-            {/* Social Links */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -192,6 +217,7 @@ export default function Portfolio() {
                 { icon: Mail, href: `mailto:${portfolioData.contact.email}`, label: "Email" },
               ].map(({ icon: Icon, href, label }) => (
                 <motion.a
+                  onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                   key={label}
                   href={href}
                   target="_blank"
@@ -205,7 +231,6 @@ export default function Portfolio() {
             </motion.div>
           </motion.div>
 
-          {/* Scroll Indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -270,6 +295,7 @@ export default function Portfolio() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {portfolioData.skills.map((skill, index) => (
               <motion.div
+                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                 key={skill}
                 initial={{ opacity: 0, scale: 0 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -312,6 +338,7 @@ export default function Portfolio() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {portfolioData.projects.map((project, index) => (
               <motion.div
+                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                 key={project.name}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -389,7 +416,6 @@ export default function Portfolio() {
           </motion.div>
 
           <div className="relative">
-            {/* Timeline line */}
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500" />
 
             {portfolioData.experience.map((exp, index) => (
@@ -402,6 +428,7 @@ export default function Portfolio() {
                 className="relative flex items-start gap-8 mb-12"
               >
                 <motion.div
+                  onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                   whileHover={{ scale: 1.2 }}
                   className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 z-10"
                 >
@@ -455,6 +482,7 @@ export default function Portfolio() {
                 { icon: Linkedin, label: "LinkedIn", value: "Connect", href: portfolioData.contact.linkedin },
               ].map(({ icon: Icon, label, value, href }) => (
                 <motion.a
+                  onMouseEnter={linkEnter} onMouseLeave={linkLeave}
                   key={label}
                   href={href}
                   target="_blank"
