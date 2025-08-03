@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { Link } from "react-router";
 import { TypeAnimation } from "react-type-animation";
 import MatrixRain from "@/components/MatrixRain";
-import { Loader2 } from "lucide-react";
+import { Loader2, Smartphone, Keyboard, Terminal, Zap } from "lucide-react";
 
 const HELP_MESSAGE = `Available commands:
   help      - Show this help message
@@ -121,8 +121,35 @@ export default function Cli() {
   const [isMatrixActive, setIsMatrixActive] = useState(false);
   const [currentDir, setCurrentDir] = useState("/home/akshay");
   const [isTrainAnimating, setIsTrainAnimating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileKeyboard, setShowMobileKeyboard] = useState(false);
+  const [commandSuggestions, setCommandSuggestions] = useState<string[]>([]);
   const terminalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Command suggestions
+  const availableCommands = ['help', 'about', 'projects', 'contact', 'clear', 'ls', 'cd', 'pwd', 'mkdir', 'cat', 'grep', 'man', 'matrix', 'sl', 'cowsay', 'fortune', 'whoami', 'uptime', 'ps', 'date', 'exit'];
+
+  useEffect(() => {
+    if (input) {
+      const suggestions = availableCommands.filter(cmd => 
+        cmd.toLowerCase().startsWith(input.toLowerCase())
+      ).slice(0, 3);
+      setCommandSuggestions(suggestions);
+    } else {
+      setCommandSuggestions([]);
+    }
+  }, [input]);
 
   useEffect(() => {
     if (terminalRef.current) {
@@ -167,42 +194,68 @@ Type 'help' for available commands or 'fortune' for wisdom!`,
     let output = "";
     let type: "output" | "error" | "success" = "output";
     let raw = false;
-    let animated = false;
 
     const newHistory = [
       ...history,
       { type: "command" as const, text: `${currentDir.split('/').pop()}@portfolio:${currentDir}$ ${commandStr}` },
     ];
 
-    switch (command) {
-      case "help":
-        output = HELP_MESSAGE;
-        type = "success";
-        break;
-      case "about":
-        output = `📋 ABOUT AKSHAY 📋\n\n${portfolioData?.about ?? "About section not found."}`;
-        type = "success";
-        break;
-      case "projects":
-        output = `🚀 MY AWESOME PROJECTS 🚀\n\n` +
-          (portfolioData?.projects
-            .map(
-              (p, i) =>
-                `[${i + 1}] ${p.name}\n    📝 ${p.desc}\n    🔗 ${p.url}\n    🛠️  Tech: ${p.tech.join(", ")}\n`,
-            )
-            .join("\n") ?? "No projects found.");
-        type = "success";
-        break;
-      case "contact":
-        output = `📞 GET IN TOUCH 📞\n\n📧 Email: ${portfolioData?.contact.email}\n🐙 Github: ${portfolioData?.contact.github}\n💼 LinkedIn: ${portfolioData?.contact.linkedin}`;
-        type = "success";
-        break;
-      case "clear":
-        setHistory([]);
-        return;
-      case "ls":
-        if (args.includes("-l")) {
-          output = `total 42
+    // Add mobile-specific commands
+    if (command === "mobile") {
+      output = `📱 MOBILE MODE DETECTED! 📱
+🎮 Touch-friendly features enabled!
+📝 Use the virtual keyboard below
+💡 Tap suggestions to auto-complete
+🔄 Swipe gestures coming soon!
+✨ Optimized for ${window.innerWidth}x${window.innerHeight}`;
+      type = "success";
+    } else if (command === "touch") {
+      output = `👆 TOUCH INTERFACE ACTIVATED! 👆
+🎯 Tap anywhere to focus input
+📋 Command suggestions appear as you type
+⌨️ Virtual keyboard available
+🎨 Haptic feedback enabled (if supported)
+📱 Responsive design active!`;
+      type = "success";
+      // Add haptic feedback if available
+      if ('vibrate' in navigator) {
+        navigator.vibrate(100);
+      }
+    } else {
+      switch (command) {
+        case "help":
+          output = `${HELP_MESSAGE}
+          
+📱 MOBILE COMMANDS:
+  mobile    - Show mobile-specific info
+  touch     - Enable touch interface features
+  keyboard  - Toggle virtual keyboard`;
+          type = "success";
+          break;
+        case "about":
+          output = `📋 ABOUT AKSHAY 📋\n\n${portfolioData?.about ?? "About section not found."}`;
+          type = "success";
+          break;
+        case "projects":
+          output = `🚀 MY AWESOME PROJECTS 🚀\n\n` +
+            (portfolioData?.projects
+              .map(
+                (p, i) =>
+                  `[${i + 1}] ${p.name}\n    📝 ${p.desc}\n    🔗 ${p.url}\n    🛠️  Tech: ${p.tech.join(", ")}\n`,
+              )
+              .join("\n") ?? "No projects found.");
+          type = "success";
+          break;
+        case "contact":
+          output = `📞 GET IN TOUCH 📞\n\n📧 Email: ${portfolioData?.contact.email}\n🐙 Github: ${portfolioData?.contact.github}\n💼 LinkedIn: ${portfolioData?.contact.linkedin}`;
+          type = "success";
+          break;
+        case "clear":
+          setHistory([]);
+          return;
+        case "ls":
+          if (args.includes("-l")) {
+            output = `total 42
 drwxr-xr-x 2 akshay akshay 4096 Dec 15 10:30 📁 projects/
 -rw-r--r-- 1 akshay akshay 2048 Dec 15 10:30 📄 resume.pdf
 -rw-r--r-- 1 akshay akshay  512 Dec 15 11:45 📝 skills.txt
@@ -212,110 +265,110 @@ drwxr-xr-x 2 akshay akshay 4096 Dec 15 10:30 📁 projects/
 -rw------- 1 akshay akshay   42 Dec 15 00:00 🔒 .hidden_secrets
 -rw-r--r-- 1 akshay akshay  128 Dec 15 09:00 ⚙️  .bashrc
 -rw-r--r-- 1 akshay akshay   64 Dec 15 09:00 📝 .vimrc`;
-          raw = true;
-          type = "success";
-        } else {
-          output = `📁 projects/     📄 resume.pdf      📝 skills.txt
+            raw = true;
+            type = "success";
+          } else {
+            output = `📁 projects/     📄 resume.pdf      📝 skills.txt
 📋 contact.json  📖 README.md       ⚡ portfolio.js
 🔒 .hidden_secrets  ⚙️ .bashrc     📝 .vimrc`;
+            type = "success";
+          }
+          break;
+        case "cd":
+          const targetDir = args[0] || "~";
+          if (targetDir === "~" || targetDir === "/home/akshay") {
+            setCurrentDir("/home/akshay");
+            output = "🏠 Welcome home!";
+            type = "success";
+          } else if (targetDir === "projects" || targetDir === "projects/") {
+            setCurrentDir("/home/akshay/projects");
+            output = "📁 Entered projects directory";
+            type = "success";
+          } else if (targetDir === ".." && currentDir !== "/home/akshay") {
+            setCurrentDir("/home/akshay");
+            output = "⬆️ Moved up one directory";
+            type = "success";
+          } else {
+            output = `❌ cd: ${targetDir}: No such file or directory`;
+            type = "error";
+          }
+          break;
+        case "pwd":
+          output = `📍 Current location: ${currentDir}`;
           type = "success";
-        }
-        break;
-      case "cd":
-        const targetDir = args[0] || "~";
-        if (targetDir === "~" || targetDir === "/home/akshay") {
-          setCurrentDir("/home/akshay");
-          output = "🏠 Welcome home!";
-          type = "success";
-        } else if (targetDir === "projects" || targetDir === "projects/") {
-          setCurrentDir("/home/akshay/projects");
-          output = "📁 Entered projects directory";
-          type = "success";
-        } else if (targetDir === ".." && currentDir !== "/home/akshay") {
-          setCurrentDir("/home/akshay");
-          output = "⬆️ Moved up one directory";
-          type = "success";
-        } else {
-          output = `❌ cd: ${targetDir}: No such file or directory`;
-          type = "error";
-        }
-        break;
-      case "pwd":
-        output = `📍 Current location: ${currentDir}`;
-        type = "success";
-        break;
-      case "mkdir":
-        const dirName = args[0];
-        if (!dirName) {
-          output = "❌ mkdir: missing operand";
-          type = "error";
-        } else {
-          output = `✅ mkdir: created directory '${dirName}' 📁`;
-          type = "success";
-        }
-        break;
-      case "rm":
-        if (args.includes("-rf") || args.includes("-r")) {
-          output = `🚨🚨🚨 DANGER WILL ROBINSON! 🚨🚨🚨
+          break;
+        case "mkdir":
+          const dirName = args[0];
+          if (!dirName) {
+            output = "❌ mkdir: missing operand";
+            type = "error";
+          } else {
+            output = `✅ mkdir: created directory '${dirName}' 📁`;
+            type = "success";
+          }
+          break;
+        case "rm":
+          if (args.includes("-rf") || args.includes("-r")) {
+            output = `🚨🚨🚨 DANGER WILL ROBINSON! 🚨🚨🚨
 💥 rm -rf DETECTED! SHIELDS UP! 💥
 🛡️ This command has been BLOCKED! 🛡️
 🤖 I'm not letting you nuke my portfolio! 
 😅 Nice try though, you sneaky hacker!
 🔒 Security level: MAXIMUM PARANOIA`;
-          type = "error";
-        } else {
-          output = `🚫 rm: operation not permitted
+            type = "error";
+          } else {
+            output = `🚫 rm: operation not permitted
 🎭 This is a demo portfolio, not a real filesystem!
 💡 Try 'help' for commands that actually work!`;
-          type = "error";
-        }
-        break;
-      case "sudo":
-        output = `🔐🔐🔐 SUDO DETECTED! 🔐🔐🔐
+            type = "error";
+          }
+          break;
+        case "sudo":
+          output = `🔐🔐🔐 SUDO DETECTED! 🔐🔐🔐
 👑 Trying to become root, eh?
 🚫 ACCESS DENIED! 🚫
 🤡 You think I'd give you admin rights?
 😂 This portfolio has trust issues!
 🎪 Welcome to the circus of broken dreams!
 💀 sudo: akshay is not in the sudoers file. This incident will be reported.`;
-        type = "error";
-        break;
-      case "cp":
-        const [source, dest] = args;
-        if (!source || !dest) {
-          output = "❌ cp: missing file operand";
           type = "error";
-        } else {
-          output = `✅ cp: copied '${source}' to '${dest}' 📋`;
-          type = "success";
-        }
-        break;
-      case "mv":
-        const [mvSource, mvDest] = args;
-        if (!mvSource || !mvDest) {
-          output = "❌ mv: missing file operand";
-          type = "error";
-        } else {
-          output = `✅ mv: moved '${mvSource}' to '${mvDest}' 🚚`;
-          type = "success";
-        }
-        break;
-      case "cat":
-        const fileName = args[0];
-        if (!fileName) {
-          output = "❌ cat: missing file operand";
-          type = "error";
-        } else if (fileName === "resume.pdf") {
-          output = "❌ cat: resume.pdf: cannot display binary file\n💡 Hint: This is a PDF! Try downloading it instead! 📄";
-          type = "error";
-        } else if (fileName === "skills.txt") {
-          output = `🛠️ MY TECHNICAL SKILLS 🛠️\n\n${portfolioData?.skills.join("\n• ") ?? "Skills not found."}`;
-          type = "success";
-        } else if (fileName === "contact.json") {
-          output = `📋 CONTACT INFORMATION 📋\n\n${JSON.stringify(portfolioData?.contact, null, 2) ?? "{}"}`;
-          type = "success";
-        } else if (fileName === "README.md") {
-          output = `📖 PORTFOLIO README 📖
+          break;
+        case "cp":
+          const [source, dest] = args;
+          if (!source || !dest) {
+            output = "❌ cp: missing file operand";
+            type = "error";
+          } else {
+            output = `✅ cp: copied '${source}' to '${dest}' 📋`;
+            type = "success";
+          }
+          break;
+        case "mv":
+          const [mvSource, mvDest] = args;
+          if (!mvSource || !mvDest) {
+            output = "❌ mv: missing file operand";
+            type = "error";
+          } else {
+            output = `✅ mv: moved '${mvSource}' to '${mvDest}' 🚚`;
+            type = "success";
+          }
+          break;
+        case "cat":
+          const fileName = args[0];
+          if (!fileName) {
+            output = "❌ cat: missing file operand";
+            type = "error";
+          } else if (fileName === "resume.pdf") {
+            output = "❌ cat: resume.pdf: cannot display binary file\n💡 Hint: This is a PDF! Try downloading it instead! 📄";
+            type = "error";
+          } else if (fileName === "skills.txt") {
+            output = `🛠️ MY TECHNICAL SKILLS 🛠️\n\n${portfolioData?.skills.join("\n• ") ?? "Skills not found."}`;
+            type = "success";
+          } else if (fileName === "contact.json") {
+            output = `📋 CONTACT INFORMATION 📋\n\n${JSON.stringify(portfolioData?.contact, null, 2) ?? "{}"}`;
+            type = "success";
+          } else if (fileName === "README.md") {
+            output = `📖 PORTFOLIO README 📖
 
 # 🚀 Akshay's Interactive Portfolio
 
@@ -336,18 +389,18 @@ Hidden throughout the terminal... can you find them all?
 
 ---
 Built with ❤️ and lots of ☕`;
-          type = "success";
-        } else if (fileName === ".hidden_secrets") {
-          output = `🤫🤫🤫 SECRET UNLOCKED! 🤫🤫🤫
+            type = "success";
+          } else if (fileName === ".hidden_secrets") {
+            output = `🤫🤫🤫 SECRET UNLOCKED! 🤫🤫🤫
 🎉 CONGRATULATIONS! You found the hidden file! 🎉
 🏆 Achievement Unlocked: "Curious Explorer"
 ✨ Here's your reward: I absolutely LOVE building cool, interactive stuff!
 🚀 Fun fact: This entire terminal is built in React!
 🎨 Another secret: The Matrix effect is pure Canvas magic!
 🤓 You're clearly a fellow developer with great taste!`;
-          type = "success";
-        } else if (fileName === ".bashrc") {
-          output = `# 🐚 Akshay's Bash Configuration
+            type = "success";
+          } else if (fileName === ".bashrc") {
+            output = `# 🐚 Akshay's Bash Configuration
 export PS1="\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
 alias ll='ls -alF'
 alias la='ls -A'
@@ -361,35 +414,35 @@ export CLICOLOR=1
 export LSCOLORS=GxFxCxDxBxegedabagaced
 
 echo "🚀 Welcome to Akshay's terminal!"`;
-          type = "success";
-        } else {
-          output = `❌ cat: ${fileName}: No such file or directory`;
-          type = "error";
-        }
-        break;
-      case "grep":
-        const pattern = args[0];
-        const grepFile = args[1];
-        if (!pattern) {
-          output = "❌ grep: missing pattern";
-          type = "error";
-        } else if (!grepFile) {
-          output = "❌ grep: missing file operand";
-          type = "error";
-        } else {
-          output = `🔍 grep: searching for '${pattern}' in ${grepFile}...
+            type = "success";
+          } else {
+            output = `❌ cat: ${fileName}: No such file or directory`;
+            type = "error";
+          }
+          break;
+        case "grep":
+          const pattern = args[0];
+          const grepFile = args[1];
+          if (!pattern) {
+            output = "❌ grep: missing pattern";
+            type = "error";
+          } else if (!grepFile) {
+            output = "❌ grep: missing file operand";
+            type = "error";
+          } else {
+            output = `🔍 grep: searching for '${pattern}' in ${grepFile}...
 📝 Match found on line 42: "The answer to everything is ${pattern}"
 ✅ Search completed successfully!`;
-          type = "success";
-        }
-        break;
-      case "man":
-        const manCommand = args[0];
-        if (!manCommand) {
-          output = "❌ man: missing command";
-          type = "error";
-        } else {
-          output = `📚 MANUAL PAGE FOR ${manCommand.toUpperCase()} 📚
+            type = "success";
+          }
+          break;
+        case "man":
+          const manCommand = args[0];
+          if (!manCommand) {
+            output = "❌ man: missing command";
+            type = "error";
+          } else {
+            output = `📚 MANUAL PAGE FOR ${manCommand.toUpperCase()} 📚
 
 NAME
     ${manCommand} - interactive portfolio command
@@ -408,86 +461,87 @@ AUTHOR
     Built with ❤️ by Akshay
     
 💡 Type 'help' to see all available portfolio commands.`;
+            type = "success";
+          }
+          break;
+        case "cowsay":
+          const message = args.join(" ") || "Hello from the CLI!";
+          output = COW_ASCII.replace("Moo! Welcome to CLI", message);
+          raw = true;
           type = "success";
-        }
-        break;
-      case "cowsay":
-        const message = args.join(" ") || "Hello from the CLI!";
-        output = COW_ASCII.replace("Moo! Welcome to CLI", message);
-        raw = true;
-        type = "success";
-        break;
-      case "fortune":
-        output = `🔮 FORTUNE COOKIE 🔮\n\n"${FORTUNES[Math.floor(Math.random() * FORTUNES.length)]}"`;
-        type = "success";
-        break;
-      case "whoami":
-        output = `🤔 WHO AM I? 🤔
+          break;
+        case "fortune":
+          output = `🔮 FORTUNE COOKIE 🔮\n\n"${FORTUNES[Math.floor(Math.random() * FORTUNES.length)]}"`;
+          type = "success";
+          break;
+        case "whoami":
+          output = `🤔 WHO AM I? 🤔
 👤 You are: A curious visitor
 🌟 Status: Exploring Akshay's portfolio
 🎯 Mission: Discover awesome projects
 🔥 Level: Hacker (for using the CLI!)`;
-        type = "success";
-        break;
-      case "uptime":
-        const uptime = Math.floor(Math.random() * 100) + 1;
-        output = `⏰ SYSTEM UPTIME ⏰
+          type = "success";
+          break;
+        case "uptime":
+          const uptime = Math.floor(Math.random() * 100) + 1;
+          output = `⏰ SYSTEM UPTIME ⏰
 🚀 Portfolio has been running for: ${uptime} minutes
 💪 Load average: 0.42, 0.69, 1.33
 🔋 Status: Running smoothly!`;
-        type = "success";
-        break;
-      case "ps":
-        output = FAKE_PROCESSES.join("\n");
-        raw = true;
-        type = "success";
-        break;
-      case "matrix":
-        setIsMatrixActive(!isMatrixActive);
-        output = `🔴💊 ${!isMatrixActive ? "ENTERING" : "EXITING"} THE MATRIX 💊🔴
+          type = "success";
+          break;
+        case "ps":
+          output = FAKE_PROCESSES.join("\n");
+          raw = true;
+          type = "success";
+          break;
+        case "matrix":
+          setIsMatrixActive(!isMatrixActive);
+          output = `🔴💊 ${!isMatrixActive ? "ENTERING" : "EXITING"} THE MATRIX 💊🔴
 ${!isMatrixActive ? "🌊 Reality is dissolving..." : "👁️ Welcome back to reality"}
 Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
-        type = "success";
-        break;
-      case "sl":
-        if (isTrainAnimating) {
-          output = "🚂 Train is already running! Please wait...";
-          type = "error";
-        } else {
-          setHistory([...newHistory, { type: "output", text: ANIMATED_TRAIN[0], raw: true }]);
-          animateTrain();
-          return;
-        }
-        break;
-      case "date":
-        const now = new Date();
-        output = `📅 ${now.toDateString()} ⏰ ${now.toLocaleTimeString()}
+          type = "success";
+          break;
+        case "sl":
+          if (isTrainAnimating) {
+            output = "🚂 Train is already running! Please wait...";
+            type = "error";
+          } else {
+            setHistory([...newHistory, { type: "output", text: ANIMATED_TRAIN[0], raw: true }]);
+            animateTrain();
+            return;
+          }
+          break;
+        case "date":
+          const now = new Date();
+          output = `📅 ${now.toDateString()} ⏰ ${now.toLocaleTimeString()}
 🌍 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
 📊 Unix timestamp: ${Math.floor(now.getTime() / 1000)}`;
-        type = "success";
-        break;
-      case "exit":
-        output = "👋 Goodbye! Redirecting to main menu...";
-        type = "success";
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
-        break;
-      case "":
-        setHistory(newHistory);
-        return;
-      default:
-        output = `❌ Command not found: ${command}
+          type = "success";
+          break;
+        case "exit":
+          output = "👋 Goodbye! Redirecting to main menu...";
+          type = "success";
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1000);
+          break;
+        case "":
+          setHistory(newHistory);
+          return;
+        default:
+          output = `❌ Command not found: ${command}
 💡 Did you mean one of these?
    • help (show all commands)
    • about (learn about me)
    • projects (see my work)
    
 🎯 Type 'help' for the full command list!`;
-        type = "error";
+          type = "error";
+      }
     }
 
-    setHistory([...newHistory, { type, text: output, raw, animated }]);
+    setHistory([...newHistory, { type, text: output, raw }]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -499,7 +553,17 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
   if (!portfolioData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
-        <Loader2 className="h-12 w-12 animate-spin text-green-400" />
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-green-400 mx-auto mb-4" />
+          <div className="text-green-400 font-mono">
+            <TypeAnimation
+              sequence={['Initializing terminal...', 1000, 'Loading portfolio data...', 1000, 'Establishing connection...', 500]}
+              wrapper="div"
+              speed={50}
+              repeat={Infinity}
+            />
+          </div>
+        </div>
       </div>
     );
   }
@@ -514,30 +578,35 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
     >
       {isMatrixActive && <MatrixRain />}
       
-      {/* Terminal Header - Gnome style */}
+      {/* Enhanced Terminal Header */}
       <div className="flex items-center justify-between p-2 bg-gray-800 border-b border-gray-600 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
         </div>
-        <div className="text-gray-300 text-sm">akshay@portfolio: ~</div>
-        <Link to="/" className="text-blue-400 hover:underline text-sm">
+        <div className="text-gray-300 text-sm flex items-center gap-2">
+          {isMobile && <Smartphone className="w-4 h-4" />}
+          <Terminal className="w-4 h-4" />
+          akshay@portfolio: ~
+        </div>
+        <Link to="/" className="text-blue-400 hover:underline text-sm flex items-center gap-1">
+          <Zap className="w-3 h-3" />
           [Switch View]
         </Link>
       </div>
 
-      {/* Terminal Content - Full scrollable area */}
+      {/* Terminal Content */}
       <div
         ref={terminalRef}
-        className="flex-1 overflow-y-auto p-4 z-10 relative"
+        className="flex-1 overflow-y-auto p-4 z-10 relative pb-32 md:pb-4"
       >
         {history.map((item, index) => (
           <div key={index} className="mb-1">
             {item.type === "command" ? (
-              <p className="text-white font-bold">{item.text}</p>
+              <p className="text-white font-bold break-all">{item.text}</p>
             ) : item.raw ? (
-              <pre className={`whitespace-pre-wrap ${
+              <pre className={`whitespace-pre-wrap text-xs md:text-sm overflow-x-auto ${
                 item.type === "error" ? "text-red-400" : 
                 item.type === "success" ? "text-green-400" : "text-green-300"
               }`}>{item.text}</pre>
@@ -547,7 +616,7 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
                 wrapper="div"
                 speed={90}
                 cursor={false}
-                className={`whitespace-pre-wrap ${
+                className={`whitespace-pre-wrap break-words ${
                   item.type === "error" ? "text-red-400" : 
                   item.type === "success" ? "text-green-400" : "text-green-300"
                 }`}
@@ -556,25 +625,112 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
           </div>
         ))}
         
-        {/* Current input line - inline with content */}
-        <form onSubmit={handleSubmit} className="flex items-center mt-2">
-          <span className="text-white font-bold mr-2 flex-shrink-0">
+        {/* Current input line */}
+        <form onSubmit={handleSubmit} className="flex items-start mt-2 flex-wrap">
+          <span className="text-white font-bold mr-2 flex-shrink-0 text-sm md:text-base">
             {currentDir.split('/').pop()}@portfolio:{currentDir}$
           </span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="bg-transparent border-none text-green-400 focus:outline-none flex-1"
-            autoFocus
-            disabled={isTrainAnimating}
-          />
+          <div className="flex-1 min-w-0">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="bg-transparent border-none text-green-400 focus:outline-none w-full text-sm md:text-base"
+              autoFocus
+              disabled={isTrainAnimating}
+              placeholder={isMobile ? "Tap to type command..." : ""}
+            />
+          </div>
           {isTrainAnimating && (
             <span className="text-yellow-400 ml-2 animate-pulse">🚂</span>
           )}
         </form>
+
+        {/* Command Suggestions */}
+        {commandSuggestions.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {commandSuggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => {
+                  setInput(suggestion);
+                  inputRef.current?.focus();
+                }}
+                className="px-2 py-1 bg-green-900/30 border border-green-500/50 rounded text-green-300 text-xs hover:bg-green-800/50 transition-colors"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Mobile Virtual Keyboard */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-600 p-2 z-20">
+          <div className="grid grid-cols-10 gap-1 mb-2">
+            {['q','w','e','r','t','y','u','i','o','p'].map(key => (
+              <button
+                key={key}
+                onClick={() => setInput(prev => prev + key)}
+                className="bg-gray-700 text-green-400 p-2 rounded text-sm hover:bg-gray-600 transition-colors"
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-9 gap-1 mb-2">
+            {['a','s','d','f','g','h','j','k','l'].map(key => (
+              <button
+                key={key}
+                onClick={() => setInput(prev => prev + key)}
+                className="bg-gray-700 text-green-400 p-2 rounded text-sm hover:bg-gray-600 transition-colors"
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-8 gap-1 mb-2">
+            {['z','x','c','v','b','n','m'].map(key => (
+              <button
+                key={key}
+                onClick={() => setInput(prev => prev + key)}
+                className="bg-gray-700 text-green-400 p-2 rounded text-sm hover:bg-gray-600 transition-colors"
+              >
+                {key}
+              </button>
+            ))}
+            <button
+              onClick={() => setInput(prev => prev.slice(0, -1))}
+              className="bg-red-700 text-white p-2 rounded text-xs hover:bg-red-600 transition-colors"
+            >
+              ⌫
+            </button>
+          </div>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setInput(prev => prev + ' ')}
+              className="flex-1 bg-gray-700 text-green-400 p-2 rounded text-sm hover:bg-gray-600 transition-colors"
+            >
+              Space
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="bg-green-700 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors flex items-center gap-1"
+            >
+              <Keyboard className="w-4 h-4" />
+              Enter
+            </button>
+            <button
+              onClick={() => setInput('')}
+              className="bg-yellow-700 text-white px-3 py-2 rounded text-sm hover:bg-yellow-600 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
