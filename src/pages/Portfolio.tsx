@@ -62,7 +62,7 @@ export default function Portfolio() {
   }
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-x-hidden">
+    <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-x-hidden cursor-none">
       {/* Animated Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
