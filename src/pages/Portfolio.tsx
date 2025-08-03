@@ -20,7 +20,9 @@ import {
   Zap,
   Rocket,
   Coffee,
-  Loader2
+  Loader2,
+  Menu,
+  X
 } from "lucide-react";
 
 export default function Portfolio() {
@@ -30,6 +32,7 @@ export default function Portfolio() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("hero");
   const [likedProjects, setLikedProjects] = useState<Set<string>>(new Set());
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { scrollYProgress } = useScroll({
@@ -200,50 +203,114 @@ export default function Portfolio() {
         animate={{ y: 0 }}
         className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10"
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <motion.div
-            onMouseEnter={linkEnter} onMouseLeave={linkLeave}
-            whileHover={{ scale: 1.05 }}
-            className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
-          >
-            {portfolioData?.name}
-          </motion.div>
-          <div className="flex items-center gap-6">
-            {["About", "Skills", "Projects", "Experience", "Contact"].map((item) => (
-              <motion.a
-                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                whileHover={{ scale: 1.1, y: -2 }}
-                className={`transition-all duration-300 ${
-                  activeSection === item.toLowerCase() 
-                    ? 'text-blue-400 font-semibold' 
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                {item}
-                {activeSection === item.toLowerCase() && (
-                  <motion.div
-                    layoutId="activeSection"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-blue-400"
-                  />
-                )}
-              </motion.a>
-            ))}
-            <Link
-              to="/"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex justify-between items-center">
+            {/* Logo */}
+            <motion.div
               onMouseEnter={linkEnter} onMouseLeave={linkLeave}
-              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+              whileHover={{ scale: 1.05 }}
+              className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
             >
-              <motion.div
-                whileHover={{ rotate: 180 }}
-                className="flex items-center gap-2"
+              {portfolioData?.name}
+            </motion.div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              {["About", "Skills", "Projects", "Experience", "Contact"].map((item) => (
+                <motion.a
+                  onMouseEnter={linkEnter} onMouseLeave={linkLeave}
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  className={`transition-all duration-300 relative ${
+                    activeSection === item.toLowerCase() 
+                      ? 'text-blue-400 font-semibold' 
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  {item}
+                  {activeSection === item.toLowerCase() && (
+                    <motion.div
+                      layoutId="activeSection"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-blue-400"
+                    />
+                  )}
+                </motion.a>
+              ))}
+              <Link
+                to="/"
+                onMouseEnter={linkEnter} onMouseLeave={linkLeave}
+                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+              >
+                <motion.div
+                  whileHover={{ rotate: 180 }}
+                  className="flex items-center gap-2"
+                >
+                  <Zap className="w-4 h-4" />
+                  Switch View
+                </motion.div>
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center gap-4">
+              <Link
+                to="/"
+                className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white text-sm font-medium"
               >
                 <Zap className="w-4 h-4" />
-                Switch View
-              </motion.div>
-            </Link>
+              </Link>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-white hover:text-blue-400 transition-colors"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </motion.button>
+            </div>
           </div>
+
+          {/* Mobile Menu */}
+          <motion.div
+            initial={false}
+            animate={{
+              height: isMobileMenuOpen ? "auto" : 0,
+              opacity: isMobileMenuOpen ? 1 : 0
+            }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden overflow-hidden"
+          >
+            <div className="py-4 space-y-4 border-t border-white/10 mt-4">
+              {["About", "Skills", "Projects", "Experience", "Contact"].map((item) => (
+                <motion.a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  whileHover={{ x: 10 }}
+                  className={`block py-2 px-4 rounded-lg transition-all ${
+                    activeSection === item.toLowerCase()
+                      ? 'text-blue-400 bg-blue-400/10 font-semibold'
+                      : 'text-white/70 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {item}
+                </motion.a>
+              ))}
+              <motion.div
+                whileHover={{ x: 10 }}
+                className="pt-2"
+              >
+                <Link
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-medium"
+                >
+                  <Zap className="w-4 h-4" />
+                  Switch to CLI View
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
       </motion.nav>
 
