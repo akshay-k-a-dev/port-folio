@@ -18,7 +18,10 @@
     "GraphQL",
     "Linux",
     "CLI",
-    "C/C++"
+    "C/C++",
+    "Documentation",
+    "Leadership",
+    "Management"
   ],
   "projects": [
     {
@@ -36,17 +39,17 @@
       "image": ""
     },
     {
-      "name": "E-commerce Platform",
-      "desc": "A modern e-commerce platform with payment integration and admin dashboard.",
-      "url": "https://github.com/akshay-k-a-dev/ecommerce",
-      "tech": ["Next.js", "Stripe", "PostgreSQL", "Prisma"],
+      "name": "Home automation",
+      "desc": "A home automation using ESP32.",
+      "url": "https://github.com/akshay-k-a-dev/Home-Automation",
+      "tech": ["C", "ESP32"],
       "image": ""
     },
     {
-      "name": "Weather Dashboard",
-      "desc": "A responsive weather dashboard with location-based forecasts and interactive maps.",
-      "url": "https://github.com/akshay-k-a-dev/weather-app",
-      "tech": ["Vue.js", "OpenWeather API", "Chart.js", "Leaflet"],
+      "name": "Automatic scholl bell",
+      "desc": "An automatic school bell system using esp8266.",
+      "url": "https://github.com/akshay-k-a-dev/AUTOMATIC-SCHOOL-BELL",
+      "tech": ["C", "ESP8266"],
       "image": ""
     }
   ],
