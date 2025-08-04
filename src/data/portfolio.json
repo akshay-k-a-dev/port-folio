@@ -51,6 +51,48 @@
       "url": "https://github.com/akshay-k-a-dev/AUTOMATIC-SCHOOL-BELL",
       "tech": ["C", "ESP8266"],
       "image": ""
+    },
+    {
+      "name": "AI assistant",
+      "desc": "An AI voice assisntant.",
+      "url": "https://github.com/akshay-k-a-dev/kunnapan-AI-Assistant",
+      "tech": ["python", "Gemini API"],
+      "image": ""
+    },
+    {
+      "name": "Random Qoute Generator",
+      "desc": "A react app that generate funky qoute.",
+      "url": "https://github.com/akshay-k-a-dev/Random-Qoute-Generator",
+      "tech": ["JavaScript", "React","RandomQoute API"],
+      "image": ""
+    },
+    {
+      "name": "muwishes",
+      "desc": "A react app that generate xmas wishes.",
+      "url": "https://github.com/akshay-k-a-dev/muwishes",
+      "tech": ["JavaScript", "Svelte","Gemini API"],
+      "image": ""
+    },
+    {
+      "name": "muwishes",
+      "desc": "A react app that generate xmas wishes.",
+      "url": "https://github.com/akshay-k-a-dev/muwishes",
+      "tech": ["JavaScript", "Svelte","Gemini API"],
+      "image": ""
+    },
+    {
+      "name": "SANTA PORTFOLIO",
+      "desc": "A react based funky portfolio for santa cluase.",
+      "url": "https://github.com/akshay-k-a-dev/SANTA-PORTFOLIO",
+      "tech": ["TypeScript", "React"],
+      "image": ""
+    },
+    {
+      "name": "SANTA PORTFOLIO",
+      "desc": "A react based funky portfolio for santa cluase.",
+      "url": "https://github.com/akshay-k-a-dev/SANTA-PORTFOLIO",
+      "tech": ["TypeScript", "React"],
+      "image": ""
     }
   ],
   "experience": [
