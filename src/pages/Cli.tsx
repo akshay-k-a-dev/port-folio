@@ -119,7 +119,7 @@ const FAKE_PROCESSES = [
   " 1337 pts/0    00:00:01 portfolio",
   " 1338 pts/0    00:00:00 node",
   " 1339 pts/0    00:00:02 react-dev",
-  " 1340 pts/0    00:00:00 convex",
+  " 1340 pts/0    00:00:00 vite",
   " 1341 pts/0    00:00:01 typescript",
   " 1342 pts/0    00:00:00 bash",
 ];
