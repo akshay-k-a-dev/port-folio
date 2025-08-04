@@ -5,31 +5,44 @@ import { TypeAnimation } from "react-type-animation";
 import MatrixRain from "@/components/MatrixRain";
 import { Loader2, Smartphone, Keyboard, Terminal, Zap } from "lucide-react";
 
-const HELP_MESSAGE = `Available commands:
-  help      - Show this help message
+const HELP_MESSAGE = `🚀 Akshay's Interactive Terminal - Help Menu 🚀
+
+[Core Commands]
   about     - Display information about me
   projects  - List my projects
+  skills    - List my technical skills
   contact   - Show my contact information
   clear     - Clear the terminal screen
-  ls        - List files and directories
-  cd        - Change directory
+  exit      - Return to the main selection screen
+
+[File System Simulation]
+  ls [path] - List files and directories
+  cd [dir]  - Change directory
   pwd       - Print working directory
-  mkdir     - Create directory
-  rm        - Remove files (disabled for safety!)
-  cp        - Copy files
-  mv        - Move/rename files
-  cat       - Display file contents
-  grep      - Search text patterns
-  man       - Show manual for commands
-  matrix    - Toggle matrix rain effect
-  sl        - Choo choo! (animated train)
+  cat [file]- Display file contents
+  mkdir [dir]- Create a directory (simulated)
+  cp [s] [d] - Copy a file (simulated)
+  mv [s] [d] - Move a file (simulated)
+  grep      - Search text patterns (simulated)
+  man [cmd] - Show manual for a command
+
+[Fun & Easter Eggs]
+  matrix    - Toggle the matrix rain effect
+  sl        - Choo choo! An animated train
   cowsay    - Make a cow say something
-  fortune   - Get a random fortune
+  fortune   - Get a random fortune cookie
+  neofetch  - Display system info with ASCII art
+  history   - Show your command history
+
+[System & Info]
   whoami    - Who are you?
-  uptime    - System uptime
-  ps        - Show running processes
+  uptime    - Show portfolio uptime
+  ps        - Show running processes (simulated)
   date      - Show current date and time
-  exit      - Return to the main selection screen`;
+  help      - Show this help message
+
+[Restricted]
+  rm, sudo  - These commands are disabled for safety!`;
 
 const ANIMATED_TRAIN = [
   `                                 (  ) (@@) ( )  (@)  ()    @@    O     @     O     @      O
@@ -114,7 +127,7 @@ const FAKE_PROCESSES = [
 export default function Cli() {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<
-    { type: "command" | "output" | "error" | "success"; text: string; raw?: boolean; animated?: boolean }[]
+    { type: "command" | "output" | "error" | "success"; text: string; raw?: boolean }[]
   >([]);
   const [isMatrixActive, setIsMatrixActive] = useState(false);
   const [currentDir, setCurrentDir] = useState("/home/akshay");
@@ -136,7 +149,7 @@ export default function Cli() {
   }, []);
 
   // Command suggestions
-  const availableCommands = ['help', 'about', 'projects', 'contact', 'clear', 'ls', 'cd', 'pwd', 'mkdir', 'cat', 'grep', 'man', 'matrix', 'sl', 'cowsay', 'fortune', 'whoami', 'uptime', 'ps', 'date', 'exit'];
+  const availableCommands = ['help', 'about', 'projects', 'skills', 'contact', 'clear', 'ls', 'cd', 'pwd', 'mkdir', 'cat', 'grep', 'man', 'matrix', 'sl', 'cowsay', 'fortune', 'whoami', 'uptime', 'ps', 'date', 'exit', 'neofetch', 'history'];
 
   useEffect(() => {
     if (input) {
@@ -370,20 +383,59 @@ Built with ❤️ and lots of ☕`;
 🤓 You're clearly a fellow developer with great taste!`;
           type = "success";
         } else if (fileName === ".bashrc") {
-          output = `# 🐚 Akshay's Bash Configuration
-export PS1="\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
+          output = `# 🐚 Akshay's Enhanced .bashrc 🐚
+# Setting a fancy prompt
+export PS1="🔥 \\[\\033[01;32m\\]\\u@portfolio\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]$ "
+
+# Aliases for the modern developer
 alias ll='ls -alF'
 alias la='ls -A'
-alias l='ls -CF'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias grep='grep --color=auto'
+alias please='sudo' # For polite people
+alias shrug='echo "¯\\_(ツ)_/¯"'
+alias gtfo='exit'
 
-# 🎨 Make terminal colorful
+# Function to greet the user
+welcome() {
+  echo "🚀 Welcome to the terminal, master! 🚀"
+}
+
+# Make life colorful
 export CLICOLOR=1
 export LSCOLORS=GxFxCxDxBxegedabagaced
 
-echo "🚀 Welcome to Akshay's terminal!"`;
+# Run on startup
+fortune | cowsay`;
+          type = "success";
+        } else if (fileName === ".vimrc") {
+          output = `""""""""""""""""""""""""""""""""""""""
+" Akshay's Legendary .vimrc         "
+" (Guaranteed to confuse everyone) "
+""""""""""""""""""""""""""""""""""""""
+set nocompatible " Be modern
+syntax on        " Make it pretty
+
+" The ultimate question: how to exit?
+" Here are some hints... or are they traps?
+nnoremap <leader>q :q!<CR> "The easy way out"
+nnoremap :q :echo "Not that easy!"<CR>
+inoremap <esc> <esc>:echo "You are trapped forever!"<CR>
+
+" Remap 'leader' key to spacebar
+let mapleader = " "
+
+" Super-powered save command
+nnoremap <leader>w :w !sudo tee % > /dev/null<CR>
+
+" Move lines up and down with ease
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+
+" Turn search highlighting on/off with a toggle
+nnoremap <leader>/ :set hlsearch!<CR>
+
+set number " Show line numbers, like a pro
+set relativenumber " ...and relative numbers, for extra confusion
+set mouse=a " Enable mouse support, because why not?`;
           type = "success";
         } else {
           output = `❌ cat: ${fileName}: No such file or directory`;
@@ -487,6 +539,36 @@ Matrix effect ${!isMatrixActive ? "ACTIVATED" : "DEACTIVATED"}!`;
         output = `📅 ${now.toDateString()} ⏰ ${now.toLocaleTimeString()}
 🌍 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
 📊 Unix timestamp: ${Math.floor(now.getTime() / 1000)}`;
+        type = "success";
+        break;
+      case "history":
+        output = "📜 COMMAND HISTORY 📜\n\n" + history.filter(h => h.type === 'command').map((h, i) => `${i + 1}: ${h.text.split('$ ')[1]}`).join('\n');
+        type = "success";
+        break;
+      case "neofetch":
+        output = `
+    'c.          akshay@portfolio
+  ,xNMM.          ------------------
+.OMMMMo           OS: Interactive Web Terminal
+OMMM0,            Host: Browser (probably Chrome/Firefox)
+,MMMM'            Kernel: JavaScript (V8/SpiderMonkey)
+.MMMM.            Uptime: ${Math.floor(Math.random() * 100) + 1} minutes
+ :MMM'            Packages: 42 (npm)
+  .MMM.           Shell: zsh (simulated)
+   ,MMM.          Resolution: Your screen size
+    :MMM.         Terminal: This React Component
+     .MMM.        CPU: Your CPU (working hard!)
+      ,MMM.       GPU: Your GPU (rendering these pixels!)
+       .MMM.      Memory: A few MBs of your RAM
+        .MMM.
+         ,MMM.
+          .MMM.
+           ,MMM.
+            :MMM:
+             :MMM:
+              :MMM:
+`;
+        raw = true;
         type = "success";
         break;
       case "exit":
