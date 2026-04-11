@@ -273,8 +273,9 @@ export default function ComingSoon() {
       {/* HEADER */}
       <div className="dock-header">
         <div className="brand-block">
-          <div className="engraved-title">Under Construction</div>
-          <div className="engraved-sub">Hardware Prototype Dock · Rev. 1.0</div>
+          <div className="engraved-name">Akshay K.A</div>
+          <div className="engraved-title">Portfolio Dock</div>
+          <div className="engraved-sub">Hardware Prototype · Rev. 1.0</div>
           <div className="led-strip" id="ledStrip">
             <div
               className="led"

@@ -67,6 +67,7 @@ body {
   padding: 48px;
   position: relative;
   user-select: none;
+  max-width: 100%;
 }
 
 /* Subtle texture overlay */
@@ -91,12 +92,25 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 36px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .brand-block {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.engraved-name {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: clamp(18px, 4vw, 28px);
+  letter-spacing: 0.12em;
+  color: var(--color-primary);
+  text-shadow: var(--shadow-engraved);
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .engraved-title {
@@ -173,6 +187,7 @@ body {
   justify-content: space-between;
   gap: 32px;
   margin-bottom: 36px;
+  flex-direction: row;
 }
 
 /* Recessed LCD */
@@ -678,18 +693,218 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .dock {
-    transform: scale(0.75);
-    transform-origin: top center;
-    margin-bottom: -120px;
+    padding: 36px;
+  }
+
+  .dock-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .model-plate {
+    align-self: flex-end;
+  }
+
+  .dock-center {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .lcd-bay {
+    width: 100%;
+  }
+
+  .dial-wrapper {
+    width: 100%;
+    align-items: center;
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 768px) {
+  body {
+    padding: 20px;
+  }
+
   .dock {
-    transform: scale(0.5);
-    transform-origin: top center;
-    margin-bottom: -280px;
+    width: 100%;
+    padding: 28px;
+  }
+
+  .engraved-name {
+    font-size: clamp(16px, 3.5vw, 24px);
+  }
+
+  .engraved-title {
+    font-size: clamp(16px, 3vw, 20px);
+  }
+
+  .engraved-sub {
+    font-size: clamp(8px, 2vw, 10px);
+  }
+
+  .dock-header {
+    margin-bottom: 24px;
+  }
+
+  .dock-center {
+    margin-bottom: 24px;
+    gap: 20px;
+  }
+
+  .dock-footer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .vent-grille {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .serial-plate {
+    width: 100%;
+    order: 2;
+    margin-top: 8px;
+  }
+
+  .power-controls {
+    width: 100%;
+    align-items: flex-start;
+    order: 3;
+  }
+
+  .dial {
+    width: 100px;
+    height: 100px;
+  }
+
+  .dial-inner {
+    width: 50px;
+    height: 50px;
+  }
+
+  .input-bay {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .engage-btn {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .dock {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .engraved-name {
+    font-size: clamp(14px, 3vw, 20px);
+  }
+
+  .engraved-title {
+    font-size: clamp(14px, 2.5vw, 16px);
+  }
+
+  .engraved-sub {
+    font-size: clamp(7px, 1.8vw, 9px);
+  }
+
+  .dock-header {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .model-plate {
+    padding: 6px 10px;
+  }
+
+  .model-plate .model-id {
+    font-size: 8px;
+  }
+
+  .dock-center {
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .lcd-bay {
+    padding: 12px 16px;
+    min-height: 70px;
+  }
+
+  .lcd-label {
+    font-size: 8px;
+  }
+
+  .lcd-readout {
+    font-size: 12px;
+  }
+
+  .dial {
+    width: 90px;
+    height: 90px;
+  }
+
+  .dial-inner {
+    width: 45px;
+    height: 45px;
+  }
+
+  .dial-value {
+    font-size: 9px;
+  }
+
+  .input-bay {
+    padding: 16px;
+  }
+
+  .input-bay::before {
+    font-size: 8px;
+    left: 16px;
+  }
+
+  .email-input {
+    font-size: 16px;
+  }
+
+  .engage-cap {
+    width: 90px;
+    height: 48px;
+  }
+
+  .engage-text {
+    font-size: 10px;
+  }
+
+  .engage-sub {
+    font-size: 7px;
+  }
+
+  .vent-slot {
+    height: 24px;
+  }
+
+  .pwr-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .input-error-msg {
+    font-size: 9px;
+  }
+
+  .led-strip {
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .led {
+    width: 7px;
+    height: 7px;
   }
 }
