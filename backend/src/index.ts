@@ -62,10 +62,12 @@ app.use((_req, res) => {
 // Global error handler (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Portfolio backend running at http://localhost:${PORT}`);
-  schedulePipeline();
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Portfolio backend running at http://localhost:${PORT}`);
+    schedulePipeline();
+  });
+}
 
 // ─── Scheduled pipeline ──────────────────────────────────────────────────────
 // Runs every 6 hours. Smart diffing in GitHub & AI services means only
