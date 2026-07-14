@@ -1,0 +1,157 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Repository {
+  id              String    @id @default(cuid())
+  githubId        Int       @unique @map("github_id")
+  name            String
+  fullName        String    @unique @map("full_name")
+  description     String?
+  url             String
+  homepage        String?
+  language        String?
+  languages       Json      @default("{}")
+  topics          String[]
+  stars           Int       @default(0)
+  forks           Int       @default(0)
+  watchers        Int       @default(0)
+  openIssues      Int       @default(0)
+  size            Int       @default(0)
+  isPrivate       Boolean   @default(false) @map("is_private")
+  isFork          Boolean   @default(false) @map("is_fork")
+  isArchived      Boolean   @default(false) @map("is_archived")
+  defaultBranch   String    @default("main") @map("default_branch")
+  license         String?
+  readme          String?   @db.Text
+  commitCount     Int       @default(0) @map("commit_count")
+  contributorCount Int      @default(0) @map("contributor_count")
+  createdAt       DateTime  @map("created_at")
+  updatedAt       DateTime  @map("updated_at")
+  pushedAt        DateTime? @map("pushed_at")
+  syncedAt        DateTime  @default(now()) @map("synced_at")
+
+  analysis        RepositoryAnalysis?
+  featuredProject FeaturedProject?
+
+  @@map("repositories")
+}
+
+model RepositoryAnalysis {
+  id              String    @id @default(cuid())
+  repositoryId    String    @unique @map("repository_id")
+  repository      Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  // AI output
+  aiScore         Float     @map("ai_score")           // 0-100 overall quality
+  complexityScore Float     @map("complexity_score")   // 0-100 technical complexity
+  impactScore     Float     @map("impact_score")       // 0-100 real-world impact
+  uniquenessScore Float     @map("uniqueness_score")   // 0-100 originality
+  
+  recommendation  String    // "include" | "exclude" | "maybe"
+  reasoning       String    @db.Text
+  highlights      String[]  // key selling points
+  tags            String[]  // generated tags (e.g. "distributed-systems", "ai-ml")
+  
+  // Approval workflow
+  status          AnalysisStatus @default(PENDING)
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  overrideNote    String?   @map("override_note") @db.Text
+  
+  // Raw AI response for debugging
+  rawResponse     Json      @map("raw_response")
+  modelUsed       String    @map("model_used")
+  promptVersion   String    @default("v1") @map("prompt_version")
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("repository_analysis")
+}
+
+model FeaturedProject {
+  id           String     @id @default(cuid())
+  repositoryId String     @unique @map("repository_id")
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  // Display overrides
+  displayTitle       String?  @map("display_title")
+  displayDescription String?  @map("display_description") @db.Text
+  displayOrder       Int      @default(0) @map("display_order")
+  pinned             Boolean  @default(false)
+  
+  // Custom metadata
+  demoUrl     String?  @map("demo_url")
+  blogPostUrl String?  @map("blog_post_url")
+  caseStudy   String?  @map("case_study") @db.Text
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("featured_projects")
+}
+
+model Override {
+  id           String   @id @default(cuid())
+  repositoryId String   @map("repository_id")
+  field        String   // which field is being overridden
+  oldValue     Json?    @map("old_value")
+  newValue     Json     @map("new_value")
+  reason       String?  @db.Text
+  createdBy    String   @map("created_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("overrides")
+}
+
+model Cache {
+  id         String   @id @default(cuid())
+  key        String   @unique
+  value      Json
+  ttlSeconds Int      @map("ttl_seconds")
+  createdAt  DateTime @default(now()) @map("created_at")
+  expiresAt  DateTime @map("expires_at")
+
+  @@index([key])
+  @@index([expiresAt])
+  @@map("cache")
+}
+
+model AnalyticsSnapshot {
+  id          String   @id @default(cuid())
+  snapshotAt  DateTime @default(now()) @map("snapshot_at")
+  totalRepos  Int      @map("total_repos")
+  featuredCount Int    @map("featured_count")
+  totalStars  Int      @map("total_stars")
+  totalForks  Int      @map("total_forks")
+  languages   Json     // { "TypeScript": 12, "Rust": 4, ... }
+  topTopics   Json     @map("top_topics")
+  githubViews Int      @default(0) @map("github_views")
+
+  @@map("analytics_snapshots")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+enum AnalysisStatus {
+  PENDING    // awaiting human review
+  APPROVED   // owner approved AI recommendation
+  REJECTED   // owner rejected AI recommendation
+  OVERRIDDEN // owner manually changed the recommendation
+}
